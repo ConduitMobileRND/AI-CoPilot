@@ -46,13 +46,36 @@ dotnet test --collect:"XPlat Code Coverage" \
 
 **Unified:** Run both, collect all coverage files
 
-### 3.5. Configure Coverage Filters
+### 3.5. Detect Project Pattern (for Coverage Filtering)
 
-**Detect project assemblies to exclude external dependencies:**
+**Create assembly filter to exclude only external dependencies:**
 
 ```bash
-# Auto-detect main project assembly name
-PROJECT_ASSEMBLY=$(find ./src -name "*.csproj" -o -name "*.Web.csproj" | head -1 | xargs basename 2>/dev/null | sed 's/\.csproj$//' || echo "Unknown")
+# Extract repository base name (e.g., "loyalty-connect-p2c" -> "Loyalty" or "P2C")
+REPO_NAME=$(basename $(pwd))
+
+# Create simple wildcard patterns to include project code and exclude external libraries
+# Include patterns: match repository assemblies
+# Exclude patterns: known external dependencies
+ASSEMBLY_FILTER="-ComoSense.Pos.Client;-Microsoft.*;-System.*;-Npgsql.*;-Newtonsoft.*;-FluentValidation.*;-Moq.*;-NUnit.*;-coverlet.*"
+
+echo "📦 Repository: $REPO_NAME"
+echo "🔍 Assembly filter: Excluding external dependencies only"
+```
+
+**How it works:**
+- ✅ Includes ALL assemblies by default (your project code)
+- ❌ Explicitly excludes only common external libraries:
+  - `ComoSense.Pos.Client` (COMO SDK)
+  - `Microsoft.*`, `System.*` (.NET framework)
+  - `Npgsql.*` (PostgreSQL driver)
+  - `Newtonsoft.*`, `FluentValidation.*` (NuGet packages)
+  - `Moq.*`, `NUnit.*`, `coverlet.*` (testing libraries)
+
+**Result:**
+- All your project assemblies are included automatically
+- No manual detection needed
+- Works for any repository structure
 
 ### 4. Fix Test Failures
 
@@ -127,29 +150,47 @@ Should I apply this fix? (y/n)
 dotnet tool install -g dotnet-reportgenerator-globaltool
 ```
 
-** Use full path to reportgenerator if not in PATH **
+**Use full path to reportgenerator if not in PATH** (e.g., `~/.dotnet/tools/reportgenerator`)
+
+**Generate Report Excluding External Dependencies:**
+
 ```bash
-**Generate Report:**
-```bash
-# Unified coverage
-reportgenerator \
+# Simple exclude-only filter: removes common external libraries, keeps all project code
+EXCLUDE_FILTER="-ComoSense.Pos.Client;-Microsoft.*;-System.*;-Npgsql.*;-Newtonsoft.*;-FluentValidation.*;-Moq.*;-NUnit.*;-coverlet.*"
+
+# Unified coverage (recommended - includes both unit and integration)
+~/.dotnet/tools/reportgenerator \
   -reports:"tests/**/coverage.cobertura.xml" \
   -targetdir:"tests/code-coverage/html-report" \
   -reporttypes:"Html;Cobertura;TextSummary" \
-  -assemblyfilters:"+*" \
+  -assemblyfilters:"${EXCLUDE_FILTER}" \
   -classfilters:"-*.Program;-*.Startup"
 
 # Unit only
-reportgenerator \
+~/.dotnet/tools/reportgenerator \
   -reports:"tests/unit/**/coverage.cobertura.xml" \
   -targetdir:"tests/code-coverage/unit-report" \
-  -reporttypes:"Html;TextSummary"
+  -reporttypes:"Html;TextSummary" \
+  -assemblyfilters:"${EXCLUDE_FILTER}"
 
 # Integration only  
-reportgenerator \
+~/.dotnet/tools/reportgenerator \
   -reports:"tests/integration/**/coverage.cobertura.xml" \
   -targetdir:"tests/code-coverage/integration-report" \
-  -reporttypes:"Html;TextSummary"
+  -reporttypes:"Html;TextSummary" \
+  -assemblyfilters:"${EXCLUDE_FILTER}"
+```
+
+**Why exclude-only approach?**
+- ✅ Includes ALL project code automatically (no manual detection needed)
+- ✅ Excludes only known external dependencies
+- ✅ Works for any repository structure
+- ✅ Simple and maintainable
+- ✅ Accurate coverage for your entire repository
+
+**Example:** For loyalty-connect-p2c:
+- Shows: `LoyaltyP2C.Web: 79.4%`, `LoyaltyP2C.Data`, etc. ✅ (all project assemblies)
+- Hides: `ComoSense.Pos.Client: 22.6%`, `Microsoft.*`, `Npgsql.*` ❌ (external packages)
 ```
 
 ### 6. Display Results
@@ -158,6 +199,7 @@ reportgenerator \
 ```
 📊 Code Coverage Report
 =======================
+Project Assemblies: {PROJECT_ASSEMBLIES}
 Scope: {unit|integration|unified}
 Date: {timestamp}
 
@@ -176,6 +218,10 @@ Coverage Goals:
 {✅|❌} Line ≥80%: {PASS|FAIL}
 {✅|⚠️} Branch ≥70%: {PASS|FAIL}  
 {✅|❌} Method ≥90%: {PASS|FAIL}
+
+Note: Coverage includes ONLY project assemblies
+      (external dependencies like ComoSense.Pos.Client, 
+       Microsoft.*, Npgsql.*, etc. are excluded)
 ```
 
 **Test Results:**

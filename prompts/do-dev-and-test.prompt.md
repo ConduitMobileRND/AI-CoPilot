@@ -1041,10 +1041,7 @@ it('should load within 3 seconds', async () => {
 
 ### Project Success Criteria
 - [ ] All MVP features implemented (Phase 1)
-- [ ] APK builds and installs successfully
-- [ ] All web app features functional in WebView
-- [ ] Minimize button works
-- [ ] Camera permissions work
+- [ ] All web app features functional
 - [ ] Error handling complete
 - [ ] Performance targets met
 - [ ] Documentation complete

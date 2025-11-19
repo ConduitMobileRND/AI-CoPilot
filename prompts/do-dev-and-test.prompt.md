@@ -44,9 +44,8 @@ cat docs/workplan.md
 # Load design document
 cat docs/design.md
 
-# Check current sprint status
+# Check current sprint status in workplan
 git log --oneline -10
-cat docs/progress.md
 ```
 
 #### 1.2 Identify Current Sprint and Stories
@@ -427,12 +426,10 @@ Please add any additional insights from reviewing this story.
 ```
 
 **Update Workplan**:
-- Mark story checkboxes as complete
-- Update sprint progress
+- Mark story acceptance criteria checkboxes as complete in workplan.md
+- Update sprint progress section (stories completed count, remaining effort)
 - Note any scope changes or discoveries
-
-**Update Progress.md**:
-- UPdate progress.md accordingly
+- Add completion timestamp and metrics to story section
 
 **Commit and Push**:
 ```bash

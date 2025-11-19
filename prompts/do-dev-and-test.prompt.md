@@ -9,7 +9,7 @@ Execute agile development sprints by implementing features from the workplan, co
 - Development environment set up for your tech stack
 - Version control initialized
 - Build tools and test frameworks configured
-- Don't start the work if prereequisites are not met, notify your human co-developer
+- Don't start the work if prerequisites are not met, notify your human co-developer
 
 ## Core Principles
 
@@ -1155,6 +1155,7 @@ open "rndebugger://set-debugger-loc?host=localhost&port=8081"
    i. Self code review
    j. Commit
    k. Mark story done
+   l. Document lessons learned if any key insights were discovered that will help future stories
 4. Track sprint progress
 5. Sprint review & retrospective
 6. Repeat for next sprint

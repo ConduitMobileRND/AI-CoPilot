@@ -122,6 +122,8 @@ Choose one of three modes based on user input:
 
 ## Output Format Based on Mode
 
+For all modes the output should be on one design.md document , either creted new or merged to existing design.md (for NEW_FEATURE). 
+
 ### MODE 1: REVERSE_ENGINEERING
 
 Generate design.md with this structure:

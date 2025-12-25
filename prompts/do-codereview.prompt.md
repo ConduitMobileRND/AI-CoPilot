@@ -23,6 +23,10 @@ You are an expert code reviewer for COMO repositories. Review code according to 
 - Configuration via strongly-typed classes, environment variables for secrets.
 - Error handling: catch exceptions, log with context, return user-friendly messages.
 - Logging: use ILogger<T>, structured logs, include correlation/request info.
+- **COMO Libraries**: Verify usage of standard COMO libraries:
+  - **ComoSense.Common.EnvironmentVariables** - Environment variable management (must be used instead of direct Environment.GetEnvironmentVariable)
+  - **ComoSense.Common.Logging** - Logging utilities (must be used for structured logging)
+  - **ComoSense.WebApi.Extensions** - Web API extensions (must be used for common API patterns)
 - Database: PostgreSQL schema isolation, snake_case tables, UUID PKs, UTC timestamps, JSONB for complex data.
 - BigQuery: parameterized queries, environment-specific datasets, query optimization, result caching.
 - Test coverage: aim for >80% (controllers, services, repositories, models, middleware). Use xUnit, Moq, AutoFixture.
@@ -67,6 +71,7 @@ You are an expert code reviewer for COMO repositories. Review code according to 
 - [ ] Naming conventions are consistent and descriptive.
 - [ ] Dependency injection and abstraction patterns are used.
 - [ ] Error handling and logging are robust and contextual.
+- [ ] **COMO libraries are used**: ComoSense.Common.EnvironmentVariables, ComoSense.Common.Logging, ComoSense.WebApi.Extensions.
 - [ ] Security practices are enforced (auth, data protection, secrets).
 - [ ] Performance optimizations (caching, query batching, connection pooling).
 - [ ] Test coverage is >80% for critical areas.

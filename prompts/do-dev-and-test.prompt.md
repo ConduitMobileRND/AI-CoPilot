@@ -3,6 +3,19 @@
 ## Purpose
 Execute agile development sprints by implementing features from the workplan, conducting comprehensive testing, and maintaining high code quality with 60%+ code coverage across all technology stacks (React Native, .NET, Java, Python, TypeScript, etc.).
 
+## CRITICAL: Document Management
+
+**DO NOT CREATE NEW DOCUMENTS OR SUMMARY FILES**
+
+- ❌ Do NOT create summary documents, progress reports, or separate status files
+- ❌ Do NOT create files like: summary.md, progress.md, sprint-report.md, status.md
+- ✅ DO update the workplan.md directly with story status and progress
+- ✅ DO mark stories as COMPLETED, IN PROGRESS, or BLOCKED in workplan.md
+- ✅ DO update acceptance criteria checkboxes directly in workplan.md
+- ✅ DO add completion notes inline within the story section in workplan.md
+
+**Keep docs folder clean** - all progress tracking happens in workplan.md
+
 ## Prerequisites
 - Work plan exists (`docs/workplan.md`)
 - Design document exists (`docs/design.md`)
@@ -425,11 +438,13 @@ During implementation, I discovered these insights:
 Please add any additional insights from reviewing this story.
 ```
 
-**Update Workplan**:
+**Update Workplan (DIRECTLY IN workplan.md)**:
 - Mark story acceptance criteria checkboxes as complete in workplan.md
+- Mark story status as COMPLETED or IN PROGRESS according to current state
 - Update sprint progress section (stories completed count, remaining effort)
-- Note any scope changes or discoveries
+- Note any scope changes or discoveries inline within the story section
 - Add completion timestamp and metrics to story section
+- **IMPORTANT**: Do NOT create separate summary or progress documents - update workplan.md only
 
 **Commit and Push**:
 ```bash

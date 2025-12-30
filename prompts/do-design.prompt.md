@@ -359,7 +359,17 @@ C4Context
   Rel(user, system, "Uses")
 ```
 
-**4.2 Component Design**
+**4.2 Scalability & Cloud Optimization**
+- **Vertical Scaling:** Architecture optimized for scaling up (CPU/memory increase)
+- **Horizontal Scaling:** Architecture optimized for scaling out (additional instances)
+- **Cloud Resource Utilization:** Design for efficient use of cloud resources
+  - Stateless components where possible for easy horizontal scaling
+  - Appropriate use of managed services (databases, caches, queues)
+  - Auto-scaling policies based on metrics (CPU, memory, request rate)
+  - Resource right-sizing to avoid over/under-provisioning
+  - Connection pooling and efficient resource cleanup
+
+**4.3 Component Design**
 - **New Components:** Components to add
 - **Modified Components:** Existing components to update
 - **Technology Stack:** Frameworks, libraries to use
@@ -376,7 +386,7 @@ graph TD
   NewComp --> ExistingComp
 ```
 
-**4.3 Detailed Component Design**
+**4.4 Detailed Component Design**
 For each new/modified component:
 - **Responsibility:** 1-2 sentences
 - **Technology:** Specific frameworks/libraries

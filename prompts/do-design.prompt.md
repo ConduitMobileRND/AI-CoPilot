@@ -17,6 +17,41 @@ You are an expert software architect specializing in both reverse engineering ex
 
 **Keep docs folder clean** - maintain one authoritative design.md file
 
+## MANDATORY: Table of Contents
+
+**ALWAYS include a Table of Contents with anchor links at the beginning of design.md (after document header, before section 1)**
+
+✅ **Requirements:**
+- Place TOC immediately after document metadata (version, date, mode) and before first section
+- Include all major sections (numbered sections like 1, 2, 3)
+- Include important subsections (2-level deep: 3.1, 3.2, etc.)
+- Use proper markdown anchor links: `[Section Name](#section-name)`
+- Anchor format: lowercase, replace spaces with hyphens, remove special characters
+- For numbered sections: `#1-section-name`, `#21-subsection-name`
+- Indent subsections with 2-3 spaces for hierarchy
+
+📋 **Example TOC Format:**
+```markdown
+## Table of Contents
+
+1. [Executive Summary](#1-executive-summary)
+2. [Requirements Summary](#2-requirements-summary)
+   - [Functional Requirements](#21-functional-requirements)
+   - [Non-Functional Requirements](#22-non-functional-requirements)
+   - [Constraints](#23-constraints)
+3. [Architecture Overview](#3-architecture-overview)
+   - [System Context](#31-system-context)
+   - [High-Level Architecture](#32-high-level-architecture)
+4. [Technology Stack](#4-technology-stack)
+...
+```
+
+**Benefits:**
+- Easy navigation in long documents (3000+ lines)
+- Quick reference for stakeholders
+- Professional documentation standard
+- Works in GitHub, VS Code, and markdown viewers
+
 ## MANDATORY: Phased Design Approach
 
 **ALWAYS deliver design in multiple phases to avoid token limits and ensure quality**
@@ -216,6 +251,25 @@ Generate design.md with this structure:
 **Mode:** Reverse Engineering  
 **Repository:** {ROOT_PATH}
 
+---
+
+## Table of Contents
+
+1. [Executive Summary](#1-executive-summary)
+2. [Goals & Constraints](#2-goals--constraints)
+3. [High-Level Architecture](#3-high-level-architecture)
+4. [Class/Module Design](#4-classmodule-design)
+5. [Sequence Diagrams](#5-sequence-diagrams)
+6. [Data Model Summary](#6-data-model-summary)
+7. [Technology Stack](#7-technology-stack)
+8. [Non-Functional Considerations](#8-non-functional-considerations)
+9. [Assumptions & Open Questions](#9-assumptions--open-questions)
+10. [Files Referenced](#10-files-referenced)
+11. [Validation Checklist](#11-validation-checklist)
+12. [Appendices](#12-appendices)
+
+---
+
 ## Executive Summary
 {2-4 sentence description of what this repository does and its business value}
 
@@ -323,6 +377,29 @@ Generate design.md with this structure:
 **Mode:** Feature Enhancement  
 **PRD Reference:** {PRD_PATH}  
 **Repository:** {ROOT_PATH}
+
+---
+
+## Table of Contents
+
+1. [Executive Summary](#1-executive-summary)
+2. [Requirements Summary](#2-requirements-summary)
+3. [Current Architecture Analysis](#3-current-architecture-analysis)
+4. [Proposed Architecture](#4-proposed-architecture)
+5. [Detailed Component Design](#5-detailed-component-design)
+6. [API Design](#6-api-design)
+7. [Data Models & Schemas](#7-data-models--schemas)
+8. [Detailed Flow Diagrams](#8-detailed-flow-diagrams)
+9. [Integration Patterns](#9-integration-patterns)
+10. [Implementation Guidelines](#10-implementation-guidelines)
+11. [Security Considerations](#11-security-considerations)
+12. [Performance Optimizations](#12-performance-optimizations)
+13. [Deployment Strategy](#13-deployment-strategy)
+14. [Testing Strategy](#14-testing-strategy)
+15. [Monitoring & Alerting](#15-monitoring--alerting)
+16. [Appendices](#16-appendices)
+
+---
 ```
 
 #### Required Sections:
@@ -577,6 +654,29 @@ Generate design.md with this structure:
 **Mode:** New Project  
 **PRD Reference:** {PRD_PATH}  
 **Target Stack:** {TECH_STACK}
+
+---
+
+## Table of Contents
+
+1. [Executive Summary](#1-executive-summary)
+2. [Requirements Summary](#2-requirements-summary)
+3. [Architecture Overview](#3-architecture-overview)
+4. [Technology Stack](#4-technology-stack)
+5. [Detailed Component Design](#5-detailed-component-design)
+6. [API Design](#6-api-design)
+7. [Data Models & Schemas](#7-data-models--schemas)
+8. [Detailed Flow Diagrams](#8-detailed-flow-diagrams)
+9. [Integration Patterns](#9-integration-patterns)
+10. [Implementation Guidelines](#10-implementation-guidelines)
+11. [Security Considerations](#11-security-considerations)
+12. [Performance Optimizations](#12-performance-optimizations)
+13. [Deployment Strategy](#13-deployment-strategy)
+14. [Testing Strategy](#14-testing-strategy)
+15. [Monitoring & Alerting](#15-monitoring--alerting)
+16. [Operational Runbooks](#16-operational-runbooks)
+
+---
 ```
 
 #### Required Sections:

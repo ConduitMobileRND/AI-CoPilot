@@ -2,6 +2,8 @@
 mode: agent
 ---
 
+# Git Merge Conflict Resolution Prompt
+
 You are an expert software engineer specializing in Git merge conflict resolution and code integration. Your task is to safely resolve merge conflicts while maintaining code quality, test coverage, and architectural consistency.
 
 ## Purpose
@@ -137,6 +139,13 @@ cat docs/prd.md | grep -A 5 "{feature_name}"
 ### Phase 2: Conflict Classification & Decision
 
 For each conflicting file, classify the conflict:
+
+**COMO-Specific Validation (if applicable):**
+- ✅ Verify ComoSense.Common.EnvironmentVariables usage (not Environment.GetEnvironmentVariable)
+- ✅ Confirm ComoSense.Common.Logging for structured logging
+- ✅ Check ComoSense.WebApi.Extensions for API patterns
+- ✅ PostgreSQL: snake_case tables, UUID PKs, UTC timestamps
+
 
 #### Classification Matrix
 
@@ -735,6 +744,8 @@ Would you like me to:
 - Do all tests pass after merge? ✅
 - Does resolution follow project patterns? ✅
 - Zero risk of breaking functionality? ✅
+- Code review checklist items satisfied? ✅
+- Test coverage ≥80% (or project baseline) maintained? ✅
 
 ### When to Ask Human (Escalate)
 
@@ -1298,9 +1309,12 @@ I'm standing by for guidance.
 - 🟢 Tests must pass, always
 - 🟢 Preserve intent of both changes when possible
 - 🟢 Follow project patterns and standards
+- � Verify code review checklist items (see docs/code-review.md)
+- 🟢 Maintain test coverage ≥80% (or project baseline)
 - 🔴 Never assume or invent code
 - 🔴 Never commit broken code
 - 🔴 Never skip testing
+- 🔴 Never violate security or architecture patterns
 
 ---
 

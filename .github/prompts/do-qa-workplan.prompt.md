@@ -123,8 +123,6 @@ If qTest cannot be detected, default to **WORKFLOW B**.
 
 Always state the selected workflow explicitly with justification.
 
-**Reference:** See `docs/AI-STLC-Triple-Workflow-Strategy.md` for complete workflow documentation.
-
 ---
 
 ## Step 3A. qTest Sync Pre-Check (Mandatory Before Updates)
@@ -274,7 +272,7 @@ Use when system is undocumented with no PRD, STP/STD, or qTest test cases.
     ```
 11. Capture and document new module ID
 12. Update Java @QTestCase annotations with PIDs from sync output
-13. Create sprint test cycle
+
 
 **Rule:** All generated documentation (Design, PRD, STP, STD, JSON) must be preserved in `docs/` and `.qtest/` folders.
 
@@ -386,6 +384,79 @@ Respond **only** with a clarification request.
 
 ---
 
+## NEXT STEPS (After Work Plan Generation)
+
+Once the QA work plan document is generated, guide the user through:
+
+### Phase 1: Test Implementation (Sprint 1)
+```bash
+# 1. Review and approve the work plan
+# 2. Set up test environment
+# 3. Implement priority 1 tests (critical path)
+```
+
+### Phase 2: qTest Integration
+
+**For WORKFLOW A (qTest-First):**
+```bash
+# Verify existing test cases match implementation
+curl -s -H "Authorization: Bearer $QTEST_API_TOKEN" \
+  "https://heartland.qtestnet.com/api/v3/projects/<PROJECT_ID>/test-cases?parentId=<MODULE_ID>"
+```
+
+**For WORKFLOW B (Code-First):**
+```bash
+# 1. Auto-extract tests to JSON
+python3 .qtest/java_parser.py <test-dir> --output test-cases/<module>
+
+# 2. Sync to qTest
+python3 .qtest/simple_sync.py test-cases/<module>/<file>.json <MODULE_ID>
+
+# 3. Update @QTestCase annotations with TC-XXXX PIDs
+# 4. Re-run parser to update JSON with PIDs
+python3 .qtest/java_parser.py <test-dir> --output test-cases/<module>
+```
+
+**For WORKFLOW C (Reverse Engineering):**
+```bash
+# 1. Use AI prompts to generate missing docs
+@workspace /do-design  # Generate design doc
+@workspace /do-prd     # Generate PRD
+@workspace /do-std     # Generate STD
+
+# 2. Then proceed with WORKFLOW B steps
+```
+
+### Phase 3: Execute Test Suite
+```bash
+# Run implemented tests
+<detected-test-command>
+
+# Examples:
+mvn test -Dtest=<TestClass>
+npm test -- <test-file>
+pytest tests/<module>
+```
+
+### Phase 4: CI/CD Integration
+- Update CI pipeline with new test suites
+- Configure test reporting (Allure, qTest integration)
+- Set up Slack/Teams notifications for failures
+
+### Phase 5: Sprint Progression
+- **Sprint 1 Complete:** Move to Priority 2 tests
+- **Sprint 2 Complete:** Integration and edge cases
+- **Sprint 3 Complete:** Performance and final polish
+- **Blocked:** Document blockers in work plan and escalate
+
+### Phase 6: Documentation & Handoff
+- Update README with test execution commands
+- Document qTest module structure and IDs
+- Create runbook for test maintenance
+- Handoff to team with demo
+
+---
+
 ## Definition of Done (Agent)
 
 The task is complete only when:
@@ -395,6 +466,7 @@ The task is complete only when:
 - All assumptions are labeled
 - qTest integration is executable
 - No blocking questions remain
+- **NEXT STEPS clearly communicated**
 
 ---
 

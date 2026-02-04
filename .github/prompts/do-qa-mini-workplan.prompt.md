@@ -225,11 +225,49 @@ If open questions exist → **STOP**.
 
 ---
 
+## NEXT STEPS (After Task Completion)
+
+Once the QA work plan is generated and tests are implemented:
+
+### 1. Execute Tests
+```bash
+# Run the implemented tests
+<detected-test-command>
+```
+
+### 2. Verify Results
+- Check test execution output
+- Review any failures or errors
+- Validate qTest sync completed (if applicable)
+
+### 3. Update qTest Annotations (if WORKFLOW B)
+```bash
+# After initial sync, update Java @QTestCase annotations with TC-XXXX PIDs
+# Then re-run parser to capture PIDs in JSON
+python3 java_parser.py <java-test-dir> --output test-cases/<module>
+```
+
+### 4. Commit & Push
+```bash
+git add .
+git commit -m "feat: Add <feature> test automation"
+git push origin <branch>
+```
+
+### 5. Next Phase Options
+- **If hotfix:** Proceed to deployment validation
+- **If POC:** Review results with stakeholders
+- **If sprint work:** Continue to next test epic/story
+- **If blocked:** Document blockers and escalate
+
+---
+
 ## Definition of Done
 - Tests implemented and executed
 - qTest updated if applicable
 - One markdown document delivered
 - Scope limited to current sprint only
+- **NEXT STEPS communicated to user**
 
 ---
 

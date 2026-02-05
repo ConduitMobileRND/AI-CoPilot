@@ -49,7 +49,8 @@ I will automatically scan your workspace for:
 - [ ] Design documents (search `docs/design/`)
 - [ ] Existing test code (check for implemented test classes)
 - [ ] Change requests / JIRA tickets (for enhancements)
-
+- [ ] lessons-learned.md (for context)
+ 
 ### Project Structure
 
 - [ ] Test framework (Playwright/Jest/TestNG/Pytest)

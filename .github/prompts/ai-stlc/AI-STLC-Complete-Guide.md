@@ -266,10 +266,15 @@ graph TD
 
 1. **Requirements** (JIRA/PRD) → Input document
 2. **do-mini-std.prompt.md** → Generate minimal STD (all test cases: manual + automation)
-3. **Extract automation tests** → Create JSON files (.qtest/test-cases/) for automation type only
-4. **[Generate code skeleton]** → Use qTest CLI or manual creation
-5. **[Implement tests]** → Automation tests only (manual tests stay in mini-STD)
-6. **[Sync to qTest]** → Upload mini-STD test cases + automation results
+3. **[Pre-Sync Checks]** → BEFORE creating JSON files:
+   - a. Verify qTest credentials (API token, project access)
+   - b. Fetch existing tests for feature (module + subfolders)
+   - c. Review existing test structure
+4. **Extract automation tests** → Create JSON files (.qtest/test-cases/) for automation type only
+5. **[Generate code skeleton]** → Use qTest CLI or manual creation
+6. **[Implement tests]** → Automation tests only (manual tests stay in mini-STD)
+7. **[Verify implementation]** → Run tests locally, ensure all pass
+8. **[Sync to qTest]** → ONLY AFTER implementation verified - Upload test cases + results
 
 **Example:**
 
@@ -306,10 +311,15 @@ graph TD
 
 1. **Change request** (JIRA) → Review what changed
 2. **Update existing docs** → Update PRD/mini-STD (add/modify test cases)
-3. **Update JSON files** → Modify `.qtest/test-cases/{package}/{Module}.json`
-4. **Update test code** → Modify existing test classes
-5. **Run regression tests** → Validate no breaks
-6. **[Sync to qTest]** → Update qTest with changes
+3. **[Pre-Sync Checks]** → BEFORE updating JSON:
+   - a. Verify qTest credentials (API token, project access)
+   - b. Fetch existing tests from qTest module
+   - c. Review current test coverage
+4. **Update JSON files** → Modify `.qtest/test-cases/{package}/{Module}.json`
+5. **Update test code** → Modify existing test classes
+6. **Run regression tests** → Validate no breaks
+7. **[Verify implementation]** → Run all tests locally, ensure pass
+8. **[Sync to qTest]** → ONLY AFTER verification - Update qTest with changes
 
 **Example:**
 
@@ -356,10 +366,15 @@ graph TD
 2. **do-stp.prompt.md** → Generate Software Test Plan (strategy)
 3. **do-std.prompt.md** → Generate Software Test Design (all test cases: manual + automation)
 4. **do-qa-workplan.prompt.md** → Generate QA Implementation Plan
-5. **Extract automation tests** → Create JSON files (.qtest/test-cases/) for automation type only
-6. **[Generate code skeleton]** → Use qTest CLI or manual creation
-7. **[Implement tests]** → Automation tests only (manual tests stay in STD)
-8. **[Sync to qTest]** → Upload STD test cases + automation results to qTest
+5. **[Pre-Sync Checks]** → BEFORE creating JSON files:
+   - a. Verify qTest credentials (API token, project access)
+   - b. Fetch existing tests for feature (module + subfolders)
+   - c. Review existing test structure and coverage
+6. **Extract automation tests** → Create JSON files (.qtest/test-cases/) for automation type only
+7. **[Generate code skeleton]** → Use qTest CLI or manual creation
+8. **[Implement tests]** → Automation tests only (manual tests stay in STD)
+9. **[Verify implementation]** → Run full test suite locally, ensure all pass
+10. **[Sync to qTest]** → ONLY AFTER verification - Upload STD test cases + automation results
 
 **⏱️ Time:** 3-5 days
 
@@ -398,10 +413,15 @@ graph TD
 
 1. **Change request** (JIRA) → Review what changed
 2. **Update documentation** → Update PRD, review/update STP, update STD
-3. **Extract automation tests** → Update JSON files with new/modified test cases
-4. **Update test code** → Add new tests, modify existing classes
-5. **Run regression tests** → Full regression validation
-6. **[Sync to qTest]** → Update qTest module with changes
+3. **[Pre-Sync Checks]** → BEFORE updating JSON:
+   - a. Verify qTest credentials (API token, project access)
+   - b. Fetch existing tests from qTest module (all subfolders)
+   - c. Review current test coverage and structure
+4. **Extract automation tests** → Update JSON files with new/modified test cases
+5. **Update test code** → Add new tests, modify existing classes
+6. **Run regression tests** → Full regression validation
+7. **[Verify implementation]** → Run complete test suite, ensure all pass
+8. **[Sync to qTest]** → ONLY AFTER verification - Update qTest module with changes
 
 **⏱️ Time:** 2-4 days
 
@@ -537,14 +557,30 @@ When you run the orchestrator, you'll receive:
 → Output: docs/doc_payment/payment-feature-mini-std.md
 → Estimated Time: 15-20 minutes (AI-assisted)
 
-**Step 2: Extract Automation Tests**
+**Step 2: Pre-Sync Checks (BEFORE creating JSON)**
+→ Verify Credentials: Check qTest API token and project access
+→ Fetch Existing Tests: Get existing tests from qTest module (if exists)
+→ Review Structure: Understand existing test organization
+→ Tools: Use .qtest/test-qtest-connection.sh to verify connectivity
+
+**Step 3: Extract Automation Tests**
 → Action: Review mini-STD and identify automation test cases
 → Create JSON: .qtest/test-cases/payment/PaymentFeature.json
+→ Include: qTestPID fields for smart sync capability
 
-**Step 3: Implement Tests**
+**Step 4: Implement Tests**
 → Reference: JSON file for automation tests
 → Implement: Test code for automation only
 → Manual tests: Stay in mini-STD documentation
+
+**Step 5: Verify Implementation**
+→ Run Locally: Execute all tests and ensure they pass
+→ Check Coverage: Validate all scenarios work correctly
+→ Fix Issues: Resolve any test failures before sync
+
+**Step 6: Sync to qTest (ONLY AFTER VERIFICATION)**
+→ Timing: Only after tests are implemented and verified
+→ Tools: Use .qtest/simple_sync.py for reliable sync
 ```
 
 **No guessing, no confusion** - just follow the steps provided!
@@ -561,6 +597,15 @@ When you run the orchestrator, you'll receive:
 2. ✅ **JSON files contain ONLY automation tests**
 3. ✅ **JSON files drive code implementation**
 4. ✅ **Manual tests stay in STD documentation**
+5. ⚠️ **Pre-Sync Checks REQUIRED** before creating JSON files:
+   - Verify qTest credentials first
+   - Fetch existing tests to avoid duplicates
+   - Review structure and naming conventions
+6. ⚠️ **Sync ONLY AFTER verification**:
+   - Tests must be implemented
+   - Tests must run locally and pass
+   - Backend features must be deployed and working
+   - Never sync unverified or failing tests
 
 #### Why This Separation?
 
@@ -649,16 +694,23 @@ npm run qtest:sync -- --module-id 67420552
 "Generate mini-STD from docs/prd/payment-feature.md using do-mini-std.prompt.md"
 # Output: docs/doc_payment/payment-feature-mini-STD.md (12 test cases: 8 auto, 4 manual)
 
-# 4. Extract automation tests to JSON
+# 4. Pre-Sync Checks (BEFORE creating JSON)
+.qtest/test-qtest-connection.sh  # Verify credentials
+curl -H "Authorization: Bearer $QTEST_API_TOKEN" \
+  "https://heartland.qtestnet.com/.../test-cases?parentId=<MODULE_ID>"  # Fetch existing tests
+# Review: Existing test structure and naming
+
+# 5. Extract automation tests to JSON
 # Create: .qtest/test-cases/payment/PaymentFeature.json (8 automation tests)
 
-# 5. Implement tests
+# 6. Implement tests
 # File: packages/payment/tests/payment-feature.spec.ts
 
-# 6. Run tests locally
+# 7. Run tests locally and verify
 npm run test:payment:local
+# Ensure: All tests pass before sync
 
-# 7. Sync to qTest (creates new module automatically)
+# 8. Sync to qTest (ONLY AFTER verification)
 npm run qtest:sync -- --module payment --create-module
 # Output: Created module 88888888 with 12 tests (8 auto + 4 manual)
 ```
@@ -686,16 +738,23 @@ npm run qtest:sync -- --module payment --create-module
 # 4. Update existing STD
 # Edit: docs/p2c/p2c-std.md (add 3 new test cases, modify 1 existing)
 
-# 5. Update JSON files
+# 5. Pre-Sync Checks (BEFORE updating JSON)
+.qtest/test-qtest-connection.sh  # Verify credentials
+curl -H "Authorization: Bearer $QTEST_API_TOKEN" \
+  "https://heartland.qtestnet.com/.../test-cases?parentId=<P2C_MODULE_ID>"  # Fetch existing
+# Review: Current test coverage and structure
+
+# 6. Update JSON files
 # Edit: .qtest/test-cases/p2c/MerchantConfigurationTest.json
 
-# 6. Update test code
+# 7. Update test code
 # Edit: rest-api/src/test/java/.../MerchantConfigurationTest.java
 
-# 7. Run regression tests
+# 8. Run regression tests
 mvn test -Pp2c
+# Ensure: All tests pass (including new and modified)
 
-# 8. Sync to qTest
+# 9. Sync to qTest (ONLY AFTER verification)
 .qtest/simple_sync.py --module p2c
 ```
 

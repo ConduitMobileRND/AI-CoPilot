@@ -125,46 +125,85 @@ Always state the selected workflow explicitly with justification.
 
 ---
 
-## Step 3A. qTest Sync Pre-Check (Mandatory Before Updates)
+## Step 3A. qTest Sync Pre-Check (Mandatory Before Creating JSON)
 
-**Applies to:** WORKFLOW A and WORKFLOW B when syncing to qTest
+**Applies to:** WORKFLOW A and WORKFLOW B when planning qTest integration
 
-### Before Updating Test Cases in qTest:
+### CRITICAL TIMING: Pre-Checks BEFORE JSON Creation
 
-1. **Read Existing Tests from qTest**
+**⚠️ DO NOT create JSON files for qTest until these checks are complete:**
+
+1. **Verify qTest Credentials**
 
    ```bash
-   # List existing tests in module
+   # Test qTest connection and permissions
+   .qtest/test-qtest-connection.sh
+   ```
+
+   **Validates:**
+   - API token is valid
+   - Project access is granted
+   - Module permissions are correct
+
+2. **Fetch Existing Tests for Feature**
+
+   ```bash
+   # List existing tests in module (including subfolders)
    curl -s -H "Authorization: Bearer $QTEST_API_TOKEN" \
      "https://heartland.qtestnet.com/api/v3/projects/124660/test-cases?parentId=<MODULE_ID>"
    ```
 
-2. **Compare with JSON Test Definitions**
-   - Load test definitions from `.qtest/test-cases/<module>/` JSON files
-   - Identify: New tests, Modified tests, Deleted tests
-   - Generate diff report
+   **Purpose:**
+   - Understand existing test structure
+   - Avoid duplicate test creation
+   - Identify which tests need updates vs new creation
+   - Review naming conventions and organization
 
-3. **Sync Changes**
+3. **Review Existing Test Structure**
+   - Note existing test case naming patterns
+   - Document module hierarchy and subfolders
+   - Identify test case types and priorities
+   - Check for any existing automation tests
+
+### After Implementation and Verification:
+
+4. **Create/Update JSON Test Definitions**
+   - Load test definitions from `.qtest/test-cases/<module>/` JSON files
+   - Ensure qTestPID fields are included for smart sync
+   - Use java_parser.py to auto-extract from implemented Java tests
+
+5. **Compare Implemented vs Existing**
+   - Identify: New tests, Modified tests, Unchanged tests
+   - Generate diff report
+   - Plan sync strategy (create/update/skip)
+
+6. **Sync Changes to qTest (ONLY AFTER VERIFICATION)**
 
    ```bash
    # Use Python sync script for reliability
    python3 .qtest/simple_sync.py test-cases/<module>/<TestFile>.json <MODULE_ID>
    ```
 
-4. **Update JSON After Test Implementation**
-   - **BEFORE** generating code or syncing to qTest
-   - Update JSON file with: test names, descriptions, steps, expected results
-   - Ensure JSON matches actual Java test methods
-   - **Rule:** JSON file = source of truth for qTest sync
+   **⚠️ CRITICAL RULE:** Only sync after:
+   - Tests are fully implemented in code
+   - Tests have been run locally and verified
+   - All tests pass successfully
+   - Backend features are deployed and working
+
+7. **Update Annotations with qTest IDs**
+   - Update Java @QTestCase annotations with TC-XXXX PIDs
+   - Re-run java_parser.py to update JSON files with PIDs
+   - Commit updated test files with qTest references
 
 ### Available qTest CLI Tools:
 
-- **Java Test Parser (Auto-Extract - NEW!):** `.qtest/java_parser.py`
+- **Java Test Parser (Auto-Extract - PREFERRED!):** `.qtest/java_parser.py`
   - Usage: `python3 java_parser.py <java-test-dir> --output test-cases/<module>`
   - **Eliminates manual JSON creation** - extracts from Java code automatically
   - Captures: @QTestCase PIDs, @DisplayName, @Description, clogger.info() steps
   - Output: JSON files ready for qTest sync with qTestPID fields
-  - **Use this FIRST** to generate JSON from existing Java tests
+  - **Use AFTER test implementation** to generate JSON from verified Java tests
+  - **Timing:** Run this after tests are coded, run, and verified locally
 
 - **Python Sync (Smart Sync):** `.qtest/simple_sync.py`
   - Usage: `python3 simple_sync.py <json-file> <module-id>`
@@ -173,23 +212,42 @@ Always state the selected workflow explicitly with justification.
   - Handles: Test creation, error reporting, PID extraction
   - Output: CSV file with PIDs for annotation updates
   - **Requires qTestPID field in JSON** for smart sync (auto-extracted by java_parser.py)
+  - **⚠️ ONLY USE AFTER:** Tests implemented, run locally, and verified
+
+- **Connection Test:** `.qtest/test-qtest-connection.sh`
+  - Validates: API token, permissions, connectivity
+  - **USE FIRST** before any qTest operations
+  - Use when troubleshooting sync issues
 
 - **Bash Sync (Legacy - Deprecated):** `.qtest/sync-tests-with-qtest.sh`
   - Note: Known issues with output buffering in loops
   - Use Python scripts instead
 
-- **Connection Test:** `.qtest/test-qtest-connection.sh`
-  - Validates: API token, permissions, connectivity
-  - Use when troubleshooting sync issues
-
 ### Hard Rules:
 
-- **Auto-generate JSON from Java code first** using java_parser.py when tests exist
+- **ALWAYS verify qTest credentials FIRST** using test-qtest-connection.sh
+- **ALWAYS fetch existing tests** before creating JSON to avoid duplicates
+- **Implement and verify tests BEFORE syncing** to qTest
+- **Auto-generate JSON from Java code** using java_parser.py after implementation
+- **Manual JSON creation** only when no Java tests exist yet (planning phase)
 - Never sync without comparing existing qTest state first
 - Always ensure JSON has qTestPID fields for smart sync capability
 - Capture PIDs after sync and update Java @QTestCase annotations
 - Document new module IDs immediately in project docs
-- Manual JSON creation only when no Java tests exist yet
+
+### Recommended Workflow:
+
+```
+1. Verify credentials    → .qtest/test-qtest-connection.sh
+2. Fetch existing tests  → curl qTest API (understand structure)
+3. Plan test structure   → Create module if needed
+4. Implement tests       → Write Java test code
+5. Run tests locally     → Validate implementation
+6. Auto-extract JSON     → python3 java_parser.py (from verified code)
+7. Sync to qTest         → python3 simple_sync.py (only after #5 passes)
+8. Update annotations    → Add TC-XXXX to @QTestCase in Java
+9. Re-extract JSON       → Update JSON with PIDs for future syncs
+```
 
 ---
 

@@ -63,7 +63,37 @@ State the decision explicitly.
 
 ---
 
-## Available qTest CLI Tools (Automation-First)
+## Available qTest CLI Tools (Use After Implementation)
+
+### ⚠️ CRITICAL PRE-SYNC CHECKS (Do These FIRST)
+
+**Before creating any JSON files or syncing to qTest:**
+
+1. **Verify qTest Credentials**
+   ```bash
+   cd .qtest
+   ./test-qtest-connection.sh
+   ```
+   **Purpose:** Ensure API token valid, project access granted
+
+2. **Fetch Existing Tests for Feature**
+   ```bash
+   # List existing tests in module (including all subfolders)
+   curl -s -H "Authorization: Bearer $QTEST_API_TOKEN" \
+     "https://heartland.qtestnet.com/api/v3/projects/124660/test-cases?parentId=<MODULE_ID>"
+   ```
+   **Purpose:**
+   - Understand existing test structure
+   - Avoid duplicate test creation
+   - Review naming conventions
+   - Check for existing automation
+
+3. **Review and Plan**
+   - Document existing test organization
+   - Identify which tests need updates vs new
+   - Plan test naming and structure
+
+### After Tests Implemented and Verified:
 
 ### 1. java_parser.py (Auto-Extract Tests)
 **Purpose:** Auto-extract test definitions from Java test files to eliminate manual JSON creation
@@ -81,7 +111,7 @@ python3 java_parser.py <java-test-dir> --output test-cases/<module-name>
 - Generates JSON files with `qTestPID` fields (critical for smart sync)
 - **Time savings: 90%+** vs manual JSON creation
 
-**When to use:** When Java test files exist with proper annotations
+**⚠️ TIMING:** Run this AFTER tests are implemented and verified locally
 
 ---
 
@@ -109,14 +139,24 @@ python3 simple_sync.py test-cases/<module>/<file>.json <qtest-module-id> [--mode
 - Prints TC-XXXX IDs for newly created tests
 - Skips tests that already exist and haven't changed
 
+**⚠️ CRITICAL TIMING:** Only sync AFTER:
+- Tests are fully implemented
+- Tests run locally and pass
+- Backend features deployed and working
+- All validation complete
+
 ---
 
 ## Hard Rules for qTest Workflow
 
-1. **Auto-generate JSON from Java code first** when tests exist
-2. **Manual JSON creation only** when no Java tests exist yet
-3. **Always include qTestPID fields** in JSON for smart sync
-4. **Re-run java_parser.py after initial sync** to capture TC-XXXX PIDs in JSON
+1. **ALWAYS verify credentials FIRST** using test-qtest-connection.sh
+2. **ALWAYS fetch existing tests** before any JSON creation
+3. **Implement and verify tests BEFORE syncing** - no premature syncs
+4. **Auto-generate JSON from Java code** when tests exist
+5. **Manual JSON creation only** when no Java tests exist yet
+6. **Always include qTestPID fields** in JSON for smart sync
+7. **Re-run java_parser.py after initial sync** to capture TC-XXXX PIDs in JSON
+8. **Never sync unverified tests** - backend must be ready
 
 ---
 
@@ -152,15 +192,24 @@ Hard failure:
 
 **Option A: Auto-Extract (Preferred when tests exist)**
 ```bash
-# 1. Auto-generate JSON from Java tests
+# STEP 0: Pre-Sync Checks (DO THESE FIRST)
+./test-qtest-connection.sh                    # Verify credentials
+curl -H "Authorization: Bearer $QTEST_API_TOKEN" \  # Fetch existing tests
+  "https://heartland.qtestnet.com/.../test-cases?parentId=<MODULE_ID>"
+# Review existing test structure and naming
+
+# STEP 1: Implement tests in Java (standard development)
+# Write test code, run locally, ensure all pass
+
+# STEP 2: ONLY AFTER tests verified - Auto-generate JSON from Java tests
 python3 java_parser.py <java-test-dir> --output test-cases/<module>
 
-# 2. Sync to qTest (creates new tests)
+# STEP 3: ONLY AFTER backend ready - Sync to qTest (creates new tests)
 python3 simple_sync.py test-cases/<module>/<file>.json <qtest-module-id>
 
-# 3. Update @QTestCase annotations in Java with TC-XXXX PIDs from sync output
+# STEP 4: Update @QTestCase annotations in Java with TC-XXXX PIDs from sync output
 
-# 4. Re-run parser to update JSON files with PIDs
+# STEP 5: Re-run parser to update JSON files with PIDs
 python3 java_parser.py <java-test-dir> --output test-cases/<module>
 ```
 

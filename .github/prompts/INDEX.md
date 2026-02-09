@@ -42,6 +42,7 @@ AI-CoPilot/
 - **[do-stp.prompt.md](ai-stlc/do-stp.prompt.md)** - Generate Software Test Plan
 - **[do-std.prompt.md](ai-stlc/do-std.prompt.md)** - Generate Software Test Design
 - **[do-qa-workplan.prompt.md](ai-stlc/do-qa-workplan.prompt.md)** - Generate QA Implementation Plan
+- **[do-implement-tests.prompt.md](do-implement-tests.prompt.md)** - Implement Automation Tests (NEW)
 
 ### Quick Path (Simple Features)
 

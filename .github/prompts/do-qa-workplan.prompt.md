@@ -496,6 +496,42 @@ npm test -- <test-file>
 pytest tests/<module>
 ```
 
+**After all tests pass locally:**
+```bash
+# Update JSON file with implementation status
+# Add "implementationStatus": "completed" to JSON metadata
+
+# Example JSON update:
+{
+  "module": "Email Template Organization",
+  "qTestModuleId": "67611955",
+  "implementationStatus": "completed",
+  "implementationDate": "2026-02-09",
+  "testsPassed": 10,
+  "testsFailed": 0,
+  "lastRunDate": "2026-02-09",
+  "testCases": [...]
+}
+
+# Commit the updated JSON with implementation status
+git add .qtest/test-cases/
+git commit -m "Mark {Module} tests as completed - all tests passing"
+```
+
+**Implementation Status Tracking Rule:**
+
+⚠️ **CRITICAL:** Update JSON file metadata when ALL tests in that file:
+- ✅ Are fully implemented (no `test.fixme()` or `@Disabled`)
+- ✅ Run locally without errors
+- ✅ Pass all assertions
+- ✅ Have proper cleanup (no leftover test data)
+
+**Status Values:**
+- `"pending"` - Tests created but not implemented
+- `"in-progress"` - Some tests implemented, some pending
+- `"completed"` - All tests implemented and passing
+- `"blocked"` - Implementation blocked by dependencies
+
 ### Phase 4: CI/CD Integration
 - Update CI pipeline with new test suites
 - Configure test reporting (Allure, qTest integration)
@@ -525,6 +561,32 @@ The task is complete only when:
 - qTest integration is executable
 - No blocking questions remain
 - **NEXT STEPS clearly communicated**
+
+---
+
+## Next Step: Test Implementation
+
+After QA work plan is complete:
+
+```
+📋 Work plan created successfully!
+
+Next step: Implement the automation tests
+
+Run: do-implement-tests.prompt.md
+
+This will:
+✅ Analyze your project structure (Java/TypeScript/Python)
+✅ Learn from existing test patterns
+✅ Guide you through implementing each test case
+✅ Generate code based on JSON specifications
+✅ Validate and verify implementation
+```
+
+**When to run implementation prompt:**
+- After JSON files are created in `.qtest/test-cases/{package}/`
+- After test spec files are created with placeholders
+- When ready to implement actual test logic
 
 ---
 

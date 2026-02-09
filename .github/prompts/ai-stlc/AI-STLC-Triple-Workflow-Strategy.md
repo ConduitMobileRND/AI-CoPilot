@@ -7,16 +7,68 @@
 ## 📋 Table of Contents
 
 1. [Executive Summary](#executive-summary)
-2. [STLC in SDLC Context](#stlc-in-sdlc-context)
-3. [Triple Workflow Strategy Overview](#triple-workflow-strategy-overview)
-4. [WORKFLOW A: qTest-First Approach](#workflow-a-qtest-first-approach)
-5. [WORKFLOW B: Code-First Approach](#workflow-b-code-first-approach)
-6. [WORKFLOW C: Reverse Engineering Approach](#workflow-c-reverse-engineering-approach)
-7. [Workflow Decision Tree](#workflow-decision-tree)
-8. [Integration with SDLC Phases](#integration-with-sdlc-phases)
-9. [Real-World Examples](#real-world-examples)
-10. [Benefits & ROI](#benefits--roi)
-11. [Implementation Roadmap](#implementation-roadmap)
+2. [MCP Server: The Game Changer](#mcp-server-the-game-changer)
+3. [STLC in SDLC Context](#stlc-in-sdlc-context)
+4. [Triple Workflow Strategy Overview](#triple-workflow-strategy-overview)
+5. [WORKFLOW A: qTest-First Approach](#workflow-a-qtest-first-approach)
+6. [WORKFLOW B: Code-First Approach](#workflow-b-code-first-approach)
+7. [WORKFLOW C: Reverse Engineering Approach](#workflow-c-reverse-engineering-approach)
+8. [Workflow Decision Tree](#workflow-decision-tree)
+9. [Integration with SDLC Phases](#integration-with-sdlc-phases)
+10. [Real-World Examples](#real-world-examples)
+11. [Benefits & ROI](#benefits--roi)
+12. [Implementation Roadmap](#implementation-roadmap)
+
+---
+
+## MCP Server: The Game Changer
+
+### Revolutionary qTest Integration
+
+The **MCP (Model Context Protocol) Server** transforms how we interact with qTest:
+
+#### MCP Server Sync:
+
+```javascript
+// 30 seconds - ONE command
+await syncTestCases(
+  client,
+  {
+    parentModuleId: "{moduleId}",
+    testsDirectory: "./.qtest/test-cases/{package}",
+    createSubmodules: true,
+  },
+  "{projectId}",
+);
+
+// Result: N tests, X submodules, 0 duplicates ✅
+```
+
+### qTest CLI Powers All 3 Workflows
+
+| Workflow                   | CLI Command                             | What It Does                                                |
+| -------------------------- | --------------------------------------- | ----------------------------------------------------------- |
+| **A: qTest-First**         | `qtest fetch`<br/>`qtest generate-code` | Fetches qTest tests → Generates Java/Python/TypeScript code |
+| **B: Code-First**          | `qtest sync`                            | Syncs JSON → qTest with auto-submodule creation             |
+| **C: Reverse Engineering** | `qtest sync`                            | Smart UPDATE existing or CREATE new tests                   |
+
+### Real Example: P2C Feature
+
+**Before MCP:** 30+ minutes manual work
+
+- 7 separate CLI sync commands
+- Manual submodule creation in qTest UI
+- Broken duplicate detection
+- Flat structure (no hierarchy)
+
+**After MCP:** 30 seconds automated
+
+- 1 command syncs all files
+- Auto-creates 7 submodules
+- Smart duplicate detection per submodule
+- Proper hierarchical structure
+
+**ROI:** 60x faster sync process
 
 ---
 
@@ -253,18 +305,21 @@ sequenceDiagram
 
 ```bash
 # Phase 1: AI Generate STP from PRD
-# Use AI Copilot with do-stp prompt + PRD document
-# Output: Software-Test-Plan-PointShop.md
+# Use AI Copilot with do-stp.prompt.md + PRD document
+# Output: docs/doc_{package}/point-shop-stp.md
 
 # Phase 2: AI Generate STD from STP
-# Use AI Copilot with do-std prompt + STP document
-# Output: Software-Test-Design-PointShop.md
+# Use AI Copilot with do-std.prompt.md + STP document
+# Output: docs/doc_{package}/point-shop-std.md
 
-# Phase 3: AI Generate QA Workplan
-# Use AI Copilot with do-qa-workplan prompt + STD document
-# Output: QA-Implementation-Plan-PointShop.md
+# Phase 3: AI Generate QA Work Plan
+# Use AI Copilot with do-qa-workplan.prompt.md + STD document
+# Output: docs/doc_{package}/point-shop-qa-workplan.md
+#   - Implementation epics and stories
+#   - All test cases organized by priority
+#   - Timeline and dependencies
 
-# Phase 4: Implement tests following the plan
+# Phase 4: Implement tests following the work plan
 # - Create test files
 # - Add page objects
 # - Add assertions
@@ -275,22 +330,29 @@ npm run test:agent:qa -- point-shop.spec.ts
 # ⚠️ CRITICAL: Ensure all tests pass AND backend is deployed before syncing
 
 # Phase 6: Pre-Sync Checks (BEFORE creating qTest module)
-# Verify qTest credentials
-npm run qtest:health
-# Fetch existing tests (if module exists) to avoid duplicates
-npm run qtest:verify -- --module agent
+# Verify qTest credentials and check existing module
+qtest check --module {moduleId} --verbose
+
+# Validate JSON ↔ Java synchronization
+cd ../qtest-mcp-server
+npm run validate:pids
 
 # Phase 7: Forward sync to qTest (ONLY AFTER verification)
-npm run qtest:sync -- --module agent --create-module
+qtest sync --module {moduleId} \
+  --tests-dir ./.qtest/test-cases/{package}/ \
+  --create-submodules
 
 # Output:
-# ✅ Created new qTest module: "Point Shop Tests"
-# ✅ Module ID: 87654321
-# ✅ Synced 30 test results
-# ✅ Pass: 30, Fail: 0
+# ✅ Created new qTest module: "{Module Name}"
+# ✅ Module ID: {moduleId}
+# ✅ Synced N test results
+# ✅ Pass: N, Fail: 0
+# ✅ JSON files auto-updated with PIDs: TC-XXX through TC-YYY
 
-# Phase 7: Create test cycle
-npm run qtest:cycle -- --name "Sprint 8 - Point Shop" --module-id 87654321
+# Phase 8: Verify PID sync and commit
+npm run validate:pids  # Check JSON ↔ Java synchronization
+git add .qtest/test-cases/
+git commit -m "feat: Add Point Shop tests - TC-XXX through TC-YYY"
 
 # Output:
 # ✅ Test cycle created: TC-56789
@@ -306,7 +368,9 @@ npm run qtest:cycle -- --name "Sprint 8 - Point Shop" --module-id 87654321
 | **Flexibility**     | Start coding before qTest ready    | Code first, sync later                 |
 | **AI Acceleration** | Faster implementation              | 3-5x faster with code generation       |
 | **Quality Gates**   | Cannot skip test design            | Forces upfront planning                |
-| **Safety**          | Pre-sync checks prevent errors     | Verify before sync, avoid duplicates   |
+| **MCP Integration** | ONE command syncs all files        | 7+ CLI commands → 1 MCP call           |
+| **Smart Sync**      | Auto-creates qTest submodules      | No manual folder creation in qTest     |
+| **Bidirectional**   | Code ↔ qTest sync                  | Generate code OR sync tests            |
 
 ### Real-World Example: Point Shop Feature
 
@@ -357,39 +421,36 @@ npm run qtest:cycle -- --name "Sprint 8 - Point Shop" --module-id 87654321
 sequenceDiagram
     participant QA as QA Engineer
     participant qTest as qTest Manager
-    participant CLI as qTest CLI
+    participant MCP as MCP Server
     participant Code as Test Automation
     participant CI as CI/CD Pipeline
 
     QA->>qTest: 1. Create Manual Test Cases
-    Note over qTest: Module ID: 68181157<br/>50 test cases defined
+    Note over qTest: Module ID: {moduleId}<br/>N test cases defined
 
-    QA->>CLI: 2. Generate Plans
-    CLI->>qTest: Fetch test case details
-    qTest-->>CLI: Return test steps, data
-    CLI-->>QA: Create N markdown files
+    QA->>MCP: 2. Generate Test Code
+    Note over MCP: generateTestCode()<br/>ONE command
+    MCP->>qTest: Fetch test case details
+    qTest-->>MCP: Return test specifications
+    MCP-->>Code: Create test files with stubs
+    Note over Code: Java/Python/TypeScript<br/>JUnit/Pytest/Playwright
 
-    QA->>CLI: 3. Generate Code Skeletons
-    CLI->>qTest: Fetch test specifications
-    qTest-->>CLI: Return structured data
-    CLI-->>Code: Create 1 test file skeleton
-
-    QA->>Code: 4. Implement Test Logic
+    QA->>Code: 3. Implement Test Logic
     Note over Code: Add page objects<br/>Add assertions<br/>Add test data
 
-    Code->>Code: 5. Run Tests Locally
-    Note over Code: Verify all pass<br/>100% pass rate<br/>Backend deployed & working
+    Code->>Code: 4. Run Tests Locally
+    Note over Code: Verify all pass<br/>100% pass rate
 
-    Code->>CLI: 6. Sync Results to qTest
-    Note over CLI: ONLY AFTER verification<br/>Tests passing locally
-    CLI->>qTest: Update execution status
-    qTest-->>CLI: Confirm sync
+    Code->>MCP: 5. Sync Results to qTest
+    MCP->>qTest: Update execution status
+    qTest-->>MCP: Confirm sync
 
-    CLI->>qTest: 7. Create Test Cycle
+    MCP->>qTest: 6. Create Test Cycle
     Note over qTest: Sprint 5 Cycle<br/>50 tests linked
 
-    CI->>Code: 8. CI/CD Execution
-    Code->>qTest: Auto-sync results
+    CI->>Code: 7. CI/CD Execution
+    Code->>MCP: Auto-sync results
+    MCP->>qTest: Update test runs
     qTest-->>QA: Dashboard updates
 ```
 
@@ -399,28 +460,27 @@ sequenceDiagram
 | ----------------------- | --------------------------- | --------------------------------------------------------- | ------------------------------------------------------------- |
 | **Test Planning**       | Define test scope in qTest  | Test modules, folders                                     | qTest Manager                                                 |
 | **Test Design**         | Create detailed test cases  | Test cases with steps, data                               | qTest Manager                                                 |
-| **Test Implementation** | Generate → Implement → Sync | - N markdown plans<br/>- 1 test file<br/>- Page objects   | - qTest CLI<br/>- Playwright/TestNG<br/>- AI (GitHub Copilot) |
+| **Test Implementation** | Generate → Implement → Sync | - QA Work Plan<br/>- 1 test file<br/>- Page objects       | - qTest CLI<br/>- Playwright/TestNG<br/>- AI (GitHub Copilot) |
 | **Test Execution**      | Automated runs + reporting  | - Test results<br/>- Screenshots<br/>- Logs               | - CI/CD<br/>- Allure<br/>- qTest sync                         |
 | **Test Reporting**      | Dashboards, metrics         | - Test cycles<br/>- Execution trends<br/>- Defect linkage | qTest Manager                                                 |
 
 ### Commands (Example: Playwright/npm)
 
 ```bash
-# Phase 1: Generate Implementation Plans (N files)
-npm run qtest:generate -- --module-id 68181157
-
-# Output:
-# ✅ Created: docs/doc_agent/plans/promo-codes/generated/
-#   - TC_PROMO_001-plan.md
-#   - TC_PROMO_002-plan.md
-#   - TC_PROMO_003-plan.md
-#   ... (N files)
+# Phase 1: Generate QA Work Plan (1 consolidated plan)
+# Use: do-qa-workplan.prompt.md with STD as input
+# Output: docs/doc_agent/promo-codes-qa-workplan.md
+#   - Implementation epics and stories
+#   - All test cases organized by priority
+#   - Timeline and dependencies
 
 # Phase 2: Generate Test Code Skeleton (1 file)
-npm run qtest:generate -- --module-id 68181157 --generate-code
+qtest generate-code --spec ./.qtest/test-cases/{package}/{Module}.json \
+  --framework playwright \
+  --output packages/{package}/tests/
 
 # Output:
-# ✅ Created: packages/agent/tests/promo-codes-test-cases.spec.ts
+# ✅ Created: packages/{package}/tests/{module}-test-cases.spec.ts
 #   (Contains all N test skeletons in one file)
 
 # Phase 3: Implement test logic (manual with AI assistance)
@@ -432,16 +492,19 @@ npm run qtest:generate -- --module-id 68181157 --generate-code
 npm run test:agent:qa -- promo-codes-test-cases.spec.ts
 # ⚠️ CRITICAL: Ensure all tests pass AND backend is ready before syncing
 
-# Phase 5: Sync results to qTest (ONLY AFTER verification)
-npm run qtest:sync -- --module agent
+# Phase 5: Validate and sync to qTest (ONLY AFTER verification)
+cd ../qtest-mcp-server
+npm run validate:pids  # Validate JSON ↔ Java sync
+
+qtest sync --module {moduleId} \
+  --tests-dir ./.qtest/test-cases/{package}/ \
+  --create-submodules
 
 # Output:
-# ✅ Synced 50 test results to qTest
-# ✅ Module ID: 68181157
+# ✅ Synced N test results to qTest
+# ✅ Module ID: {moduleId}
 # ✅ Pass: 48, Fail: 2
-
-# Phase 6: Create test cycle
-npm run qtest:cycle -- --name "Sprint 5 - Promo Codes" --module-id 68181157
+# ✅ JSON files auto-updated with PIDs for new tests
 
 # Output:
 # ✅ Test cycle created: TC-12345
@@ -487,51 +550,55 @@ npm run test:cp:qa -- payment-wallet-test-cases.spec.ts
 
 # ⏱️ Duration: 2m 30s
 
-# Phase 7: Forward sync to qTest (creates module)
+# Phase 7: Validate and sync to qTest (creates module)
 
-npm run qtest:sync -- --module cp
+cd ../qtest-mcp-server
+npm run validate:pids # Validate JSON ↔ Java sync
+
+qtest sync --module {moduleId} \
+ --tests-dir ./.qtest/test-cases/{package}/ \
+ --create-submodules
 
 # Output:
 
 # ✅ Created new qTest module
 
-# ✅ Module ID: 78923456
+# ✅ Module ID: {moduleId}
 
-# ✅ Synced 25 test cases
+# ✅ Synced N test cases
 
 # ✅ All tests marked as "Passed"
 
+# ✅ JSON files auto-updated with PIDs: TC-XXX through TC-YYY
+
 # Phase 8: Verify sync and capture module ID
 
-npm run qtest:verify -- --module cp
+npm run validate:pids # Verify JSON ↔ Java synchronization
 
 # Output:
 
-# ✅ Module ID: 78923456
+# ✅ Module ID: {moduleId}
 
-# ✅ Test cases in qTest: 25
+# ✅ Test cases in qTest: N
 
-# ✅ Test cases in code: 25
+# ✅ Test cases in code: N
 
 # ✅ Coverage: 100%
 
-# Phase 9: Document module ID for future reference
+# ✅ All PIDs synced correctly
+
+# Phase 9: Document module ID and commit changes
 
 echo "## qTest Module
 
-- **Module ID:** 78923456
-- **Created:** 2026-01-28
-- **Test Count:** 25" >> docs/doc_cp/plans/payment-wallet/README.md
+- **Module ID:** {moduleId}
+- **Created:** $(date +%Y-%m-%d)
+- **Test Count:** N
+- **PIDs:** TC-XXX through TC-YYY" >> docs/doc\_{package}/plans/{feature}/README.md
 
-# Phase 10: Create test cycle
-
-npm run qtest:cycle -- --name "Sprint 5 - Payment Wallet" --module-id 78923456
-
-# Output:
-
-# ✅ Test cycle created: TC-12346
-
-# ✅ 25 tests linked to cycle
+git add .qtest/test-cases/{package}/
+git add rest-api/src/test/java/
+git commit -m "feat: Add payment wallet tests - TC-XXX through TC-YYY"
 
 ````
 
@@ -551,8 +618,8 @@ npm run qtest:cycle -- --name "Sprint 5 - Payment Wallet" --module-id 78923456
 
 **Inputs**:
 
-- qTest Module ID: `68181157`
-- Test cases: 340 (created by QA team over 12 months)
+- qTest Module ID: `{moduleId}`
+- Test cases: N (created by QA team over X months)
 
 **Process**:
 
@@ -629,7 +696,7 @@ sequenceDiagram
     QA->>CLI: 8. Forward Sync to qTest
     CLI->>qTest: Create new module
     qTest-->>CLI: Return new Module ID
-    CLI-->>QA: Module ID: 89734512
+    CLI-->>QA: Module ID: {moduleId}
 
     QA->>Docs: 9. Document Module ID
     Note over Docs: Update README.md<br/>Reference for future
@@ -682,7 +749,7 @@ cat docs/doc_loyalty/loyalty-rewards-stp.md
 cat docs/doc_loyalty/loyalty-rewards-std.md
 
 # Phase 7: Implement tests (manual with AI assistance)
-# Create: packages/loyalty/tests/loyalty-rewards-test-cases.spec.ts
+# Create: packages/{package}/tests/{feature}-test-cases.spec.ts
 # - Implement all test scenarios from STP/STD
 # - Add page objects
 # - Add test data
@@ -696,40 +763,42 @@ npm run test:loyalty:qa -- loyalty-rewards-test-cases.spec.ts
 # ⚠️ Verified: Backend deployed and all tests passing
 
 # Phase 9: Pre-Sync Checks (BEFORE creating qTest module)
-npm run qtest:health  # Verify credentials
-# Review: No existing module for 'loyalty'
+cd /Users/aliktitelman/myworkspace/qtest-mcp-server
+npm run validate:pids  # Check JSON ↔ Java synchronization
+npm run check:duplicates  # Check for duplicate PIDs
 
 # Phase 10: Forward sync to qTest (ONLY AFTER verification)
-npm run qtest:sync -- --module loyalty
+qtest sync --module {moduleId} \
+  --tests-dir ./.qtest/test-cases/{package}/ \
+  --create-submodules
 
 # Output:
 # ✅ Created new qTest module
-# ✅ Module ID: 89734512
-# ✅ Synced 30 test cases
-# ✅ All tests marked as "Passed"
+# ✅ Module ID: {moduleId}
+# ✅ Synced N test cases in X submodules
+# ✅ 0 duplicates
+# ✅ JSON files auto-updated with PIDs: TC-XXX through TC-YYY
 
-# Phase 11: Verify sync and capture module ID
-npm run qtest:verify -- --module loyalty
+# Phase 11: Verify sync and commit
+npm run validate:pids  # Verify JSON ↔ Java synchronization
 
 # Output:
-# ✅ Module ID: 89734512
-# ✅ Test cases in qTest: 30
-# ✅ Test cases in code: 30
-# ✅ Coverage: 100%
+# ✅ Found 3 submodules
+# ✅ Total: 30 test cases
+# ✅ No duplicates found
+# ✅ All PIDs synced correctly
+
+git add .qtest/test-cases/loyalty/
+git add rest-api/src/test/java/
+git commit -m "feat: Add loyalty rewards tests - TC-XXX through TC-YYY"
 
 # Phase 12: Document module ID for future reference
 echo "## qTest Module
-- **Module ID:** 89734512
-- **Created:** 2026-01-28
-- **Test Count:** 30
-- **Source:** Reverse engineered from existing system" >> docs/doc_loyalty/plans/loyalty-rewards/README.md
-
-# Phase 13: Create test cycle
-npm run qtest:cycle -- --name "Sprint 6 - Loyalty Rewards" --module-id 89734512
-
-# Output:
-# ✅ Test cycle created: TC-12347
-# ✅ 30 tests linked to cycle
+- **Module ID:** {moduleId}
+- **Created:** $(date +%Y-%m-%d)
+- **Test Count:** N
+- **Source:** Reverse engineered from existing system
+- **PIDs:** TC-XXX through TC-YYY" >> docs/doc_{package}/plans/{feature}/README.md
 ```
 
 ### Key Benefits
@@ -768,7 +837,7 @@ npm run qtest:cycle -- --name "Sprint 6 - Loyalty Rewards" --module-id 89734512
 7. ✅ Implemented 30 test cases in 1 file (4 days with AI)
 8. ✅ Ran tests locally (100% pass rate)
 9. ✅ Forward synced to qTest (created new module)
-10. ✅ Captured Module ID: `89734512`
+10. ✅ Captured Module ID: `{moduleId}`
 11. ✅ Documented module ID in README
 12. ✅ Created test cycle for Sprint 6
 
@@ -850,8 +919,8 @@ graph TD
 
 ```bash
 # Check for qTest module
-npm run qtest:health
-npm run qtest:verify -- --module [module-name]
+# MCP Server uses GCP Secret Manager for auth
+node ../qtest-mcp-server/analyze-local-tests.js  # Verify JSON files
 
 # Check for PRD/STP/STD docs
 find docs -name "*prd*.md" -o -name "*PRD*.md"
@@ -996,11 +1065,18 @@ find docs -type f -name "*.md" | wc -l
 # Run tests
 npm run test:[module]:[env]
 
-# Sync results
-npm run qtest:sync -- --module [module]
+# Validate synchronization
+cd ../qtest-mcp-server
+npm run validate:pids
 
-# Create cycle
-npm run qtest:cycle -- --name "Sprint X" --module-id [ID]
+# Sync results
+qtest sync --module {moduleId} \
+  --tests-dir ./.qtest/test-cases/{package}/ \
+  --create-submodules
+
+# Commit changes with PIDs
+git add .qtest/test-cases/
+git commit -m "feat: Add {feature} tests - TC-XXX through TC-YYY"
 ```
 
 **Tools**:
@@ -1030,8 +1106,13 @@ npm run qtest:cycle -- --name "Sprint X" --module-id [ID]
 # Production smoke tests
 npm run test:smoke:prod
 
-# Sync to production cycle
-npm run qtest:sync -- --module agent --cycle "Production Release v2.5"
+# Validate and sync to production cycle
+cd ../qtest-mcp-server
+npm run validate:pids
+
+qtest sync --module {moduleId} \
+  --tests-dir ./.qtest/test-cases/smoke/ \
+  --create-submodules
 ```
 
 ---
@@ -1070,8 +1151,8 @@ npm run qtest:sync -- --module agent --cycle "Production Release v2.5"
 
 **Reasoning**:
 
-- ✅ qTest module exists (ID: `68181157`)
-- ✅ 104 test cases already defined
+- ✅ qTest module exists (ID: `{moduleId}`)
+- ✅ N test cases already defined
 - ✅ Test cases reviewed and approved
 - ✅ Need traceability to requirements
 
@@ -1079,11 +1160,15 @@ npm run qtest:sync -- --module agent --cycle "Production Release v2.5"
 
 ```bash
 # Week 1: Generate plans and skeletons
-npm run qtest:generate -- --module-id 68181157
-npm run qtest:generate -- --module-id 68181157 --generate-code
+qtest fetch --module {moduleId} \
+  --output ./.qtest/test-cases/{package}/{Module}.json
+
+qtest generate-code --spec ./.qtest/test-cases/{package}/{Module}.json \
+  --framework playwright \
+  --output packages/{package}/tests/
 
 # Output:
-# ✅ 104 markdown plans created
+# ✅ 104 test cases fetched from qTest
 # ✅ 1 test file skeleton: agent-pos-test-cases.spec.ts
 
 # Week 2-3: Implement tests (with AI)
@@ -1092,9 +1177,16 @@ npm run qtest:generate -- --module-id 68181157 --generate-code
 # - Added test data
 # - Local testing: 104/104 passing
 
-# Week 4: Sync and report
-npm run qtest:sync -- --module agent
-npm run qtest:cycle -- --name "Sprint 3 - Agent POS Automation" --module-id 68181157
+# Week 4: Validate and sync results
+cd ../qtest-mcp-server
+npm run validate:pids
+
+qtest sync --module {moduleId} \
+  --tests-dir ./.qtest/test-cases/{package}/ \
+  --create-submodules
+
+git add .qtest/test-cases/{package}/
+git commit -m "feat: Add Agent POS tests - TC-XXX through TC-YYY"
 ```
 
 **Results**:
@@ -1148,31 +1240,35 @@ cat docs/doc_cp/payment-wallet-stp.md
 cat docs/doc_cp/payment-wallet-std.md
 
 # Day 3-10: Implement tests (with AI)
-# Created: packages/cp/tests/payment-wallet-test-cases.spec.ts
-# - 25 test scenarios from STP/STD
-# - Page object: PaymentWalletPage
-# - Test data: wallet-test-data.ts
-# - Local testing: 25/25 passing
+# Created: packages/{package}/tests/{feature}-test-cases.spec.ts
+# - N test scenarios from STP/STD
+# - Page object: {Feature}Page
+# - Test data: {feature}-test-data.ts
+# - Local testing: N/N passing
 # ⚠️ Verified: Backend deployed and all tests passing
 
-# Day 11: Pre-Sync Checks (BEFORE creating qTest module)
-npm run qtest:health  # Verify credentials
-# Review: No existing module for 'cp' payment wallet
+# Day 11: Pre-Sync Checks and validation
+cd ../qtest-mcp-server
+npm run validate:pids  # Check JSON ↔ Java synchronization
 
 # Day 11: Forward sync to qTest (ONLY AFTER verification)
-npm run qtest:sync -- --module cp
+qtest sync --module {moduleId} \
+  --tests-dir ./.qtest/test-cases/{package}/ \
+  --create-submodules
 
 # Output:
 # ✅ Created new qTest module
-# ✅ Module ID: 78923456
-# ✅ Synced 25 test cases
+# ✅ Module ID: {moduleId}
+# ✅ Synced N test cases
+# ✅ JSON files auto-updated with PIDs: TC-XXX through TC-YYY
 
-# Day 11: Capture module ID
-npm run qtest:verify -- --module cp
-echo "qTest Module: 78923456" >> docs/doc_cp/plans/payment-wallet/README.md
+# Day 11: Capture module ID and commit changes
+npm run validate:pids  # Verify all PIDs synced
+echo "qTest Module: {moduleId}" >> docs/doc_{package}/plans/{feature}/README.md
 
-# Day 12: Create test cycle
-npm run qtest:cycle -- --name "Sprint 5 - Payment Wallet" --module-id 78923456
+git add .qtest/test-cases/{package}/
+git add rest-api/src/test/java/
+git commit -m "feat: Add {feature} tests - TC-XXX through TC-YYY"
 ```
 
 **Results**:
@@ -1215,25 +1311,42 @@ npm run qtest:cycle -- --name "Sprint 5 - Payment Wallet" --module-id 78923456
 
 ```bash
 # Phase 1: Existing tests (WORKFLOW A)
-npm run qtest:generate -- --module-id 65432100
-npm run qtest:generate -- --module-id 65432100 --generate-code
+qtest fetch --module {moduleId} \
+  --output ./.qtest/test-cases/{package}/{Module}.json
+
+qtest generate-code --spec ./.qtest/test-cases/{package}/{Module}.json \
+  --framework testng \
+  --output rest-api/src/test/java/
 
 # Implement 30 tests
 # ...
 
-npm run qtest:sync -- --module data-validation
+cd ../qtest-mcp-server
+npm run validate:pids
+
+qtest sync --module {moduleId} \
+  --tests-dir ./.qtest/test-cases/{package}/ \
+  --create-submodules
 
 # Phase 2: New tests (WORKFLOW B)
 # Read STD: docs/doc_api/data-validation-std.md
 # Implement 38 new tests in same file
 
-# Forward sync new tests
-npm run qtest:sync -- --module data-validation
+# Validate and forward sync new tests
+npm run validate:pids
+
+qtest sync --module {moduleId} \
+  --tests-dir ./.qtest/test-cases/{package}/ \
+  --create-submodules
 
 # Output:
-# ✅ Updated qTest module: 65432100
-# ✅ Added 38 new test cases
+# ✅ Updated qTest module: {moduleId}
+# ✅ Added N new test cases
 # ✅ Total: 68 tests in qTest
+# ✅ JSON files auto-updated with PIDs: TC-XXX through TC-YYY
+
+git add .qtest/test-cases/{package}/
+git commit -m "feat: Add {feature} tests - TC-XXX through TC-YYY"
 ```
 
 **Results**:
@@ -1453,20 +1566,27 @@ npm run qtest:sync -- --module data-validation
 **WORKFLOW A Commands**:
 
 ```bash
-# Generate plans
-npm run qtest:generate -- --module-id [ID]
+# Fetch test specs from qTest
+qtest fetch --module {moduleId} \
+  --output ./.qtest/test-cases/{package}/{Module}.json
 
-# Generate code
-npm run qtest:generate -- --module-id [ID] --generate-code
+# Generate code skeleton
+qtest generate-code --spec ./.qtest/test-cases/{package}/{Module}.json \
+  --framework {playwright|testng|pytest} \
+  --output {output-dir}/
 
-# Sync results
-npm run qtest:sync -- --module [name]
+# Validate synchronization
+cd ../qtest-mcp-server
+npm run validate:pids
 
-# Verify
-npm run qtest:verify -- --module-id [ID]
+# Sync results to qTest
+qtest sync --module {moduleId} \
+  --tests-dir ./.qtest/test-cases/{package}/ \
+  --create-submodules
 
-# Create cycle
-npm run qtest:cycle -- --name "Sprint X" --module-id [ID]
+# Commit changes
+git add .qtest/test-cases/
+git commit -m "feat: Add {feature} tests - TC-XXX through TC-YYY"
 ```
 
 **WORKFLOW B Commands**:
@@ -1487,17 +1607,23 @@ cat docs/doc_[module]/[feature]-std.md
 
 # 5. Implement tests (with AI assistance)
 
-# 6. Sync to create module
-npm run qtest:sync -- --module [name]
+# 6. Validate and sync to create module
+cd ../qtest-mcp-server
+npm run validate:pids
+
+qtest sync --module {moduleId} \
+  --tests-dir ./.qtest/test-cases/{package}/ \
+  --create-submodules
 
 # Verify and capture ID
-npm run qtest:verify -- --module [name]
+npm run validate:pids
 
-# Document module ID
-echo "Module ID: [ID]" >> docs/doc_[module]/plans/[feature]/README.md
+# Document module ID and commit
+echo "Module ID: {moduleId}" >> docs/doc_[module]/plans/[feature]/README.md
 
-# Create cycle
-npm run qtest:cycle -- --name "Sprint X" --module-id [NEW_ID]
+git add .qtest/test-cases/
+git add rest-api/src/test/java/
+git commit -m "feat: Add {feature} tests - TC-XXX through TC-YYY"
 ```
 
 **WORKFLOW C Commands**:
@@ -1531,18 +1657,25 @@ cat docs/doc_[module]/[feature]-std.md
 
 # 7. Implement tests (with AI assistance)
 
-# 8. Sync to create module
-npm run qtest:sync -- --module [name]
+# 8. Validate and sync to create module
+cd ../qtest-mcp-server
+npm run validate:pids
+
+qtest sync --module {moduleId} \
+  --tests-dir ./.qtest/test-cases/{package}/ \
+  --create-submodules
 
 # 9. Verify and capture ID
-npm run qtest:verify -- --module [name]
+npm run validate:pids
 
-# 10. Document module ID
-echo "Module ID: [ID]
-Source: Reverse engineered" >> docs/doc_[module]/plans/[feature]/README.md
+# 10. Document module ID and commit
+echo "Module ID: {moduleId}
+Source: Reverse engineered
+PIDs: TC-XXX through TC-YYY" >> docs/doc_{package}/plans/{feature}/README.md
 
-# 11. Create cycle
-npm run qtest:cycle -- --name "Sprint X" --module-id [NEW_ID]
+git add .qtest/test-cases/
+git add rest-api/src/test/java/
+git commit -m "feat: Add {feature} tests - TC-XXX through TC-YYY"
 ```
 
 ### C. Decision Checklist
@@ -1609,8 +1742,151 @@ The **AI-Driven STLC Triple Workflow Strategy** provides:
 
 ---
 
-**Document Version**: 2.0  
-**Last Updated**: January 28, 2026  
+## MCP Server Integration Guide
+
+### Essential Commands for All Workflows
+
+**MCP Server Location:** `/Users/aliktitelman/myworkspace/qtest-mcp-server`
+
+#### Workflow A: qTest → Code
+
+```bash
+cd /Users/aliktitelman/myworkspace/qtest-mcp-server
+
+# Generate test code from qTest module
+# Uses generateTestCode() MCP tool
+# Creates Java/Python/TypeScript code from qTest test cases
+```
+
+Programmatic usage:
+
+```javascript
+await generateTestCode(
+  client,
+  {
+    moduleId: "{moduleId}",
+    outputDirectory: "./generated-tests",
+    language: "java",
+    framework: "junit",
+  },
+  projectId,
+);
+```
+
+#### Workflow B & C: Code → qTest
+
+```bash
+cd /Users/aliktitelman/myworkspace/qtest-mcp-server
+
+# 1. Pre-Sync: Validate JSON files
+node analyze-local-tests.js
+
+# 2. Sync to qTest (creates tests and submodules)
+node sync-{feature}.js  # Use template from sync-p2c.js
+
+# 3. Post-Sync: Verify no duplicates
+node cleanup-duplicates.js
+
+# If re-syncing (updating existing tests):
+node deep-cleanup.js  # Delete all first
+node sync-{feature}.js  # Fresh sync
+```
+
+### Key MCP Tools
+
+| Tool                     | Workflow | Purpose                                      |
+| ------------------------ | -------- | -------------------------------------------- |
+| `generateTestCode()`     | A        | qTest → Generate Java/Python/TypeScript code |
+| `syncTestCases()`        | B, C     | JSON files → qTest (creates/updates)         |
+| `analyze-local-tests.js` | B, C     | Validate JSON before sync                    |
+| `deep-cleanup.js`        | B, C     | Delete all tests (before re-sync)            |
+| `cleanup-duplicates.js`  | B, C     | Find and remove duplicates                   |
+
+### MCP vs Old CLI
+
+| Feature                 | Old CLI        | MCP Server                 |
+| ----------------------- | -------------- | -------------------------- |
+| **Sync command count**  | 7+ per feature | **1 command**              |
+| **Submodule creation**  | Manual in UI   | **Automatic**              |
+| **Duplicate detection** | Broken         | **Smart per-submodule**    |
+| **Code generation**     | Not supported  | **Java/Python/TypeScript** |
+| **Batch processing**    | File-by-file   | **Directory-based**        |
+| **Time per sync**       | 30+ minutes    | **30 seconds**             |
+
+### MCP Sync Script Template
+
+```javascript
+#!/usr/bin/env node
+import { QTestClient } from "./dist/qtest-client.js";
+import { syncTestCases } from "./dist/tools/sync-test-cases.js";
+import { execSync } from "child_process";
+
+const PROJECT_ID = "124660";
+const MODULE_ID = "YOUR_MODULE_ID";
+
+async function main() {
+  const secret = JSON.parse(
+    execSync(
+      "gcloud secrets versions access latest --secret=qa-id-300-app-automation-main-secret --project=qa-us-automation",
+      { encoding: "utf8" },
+    ),
+  );
+
+  const client = new QTestClient(
+    "https://heartland.qtestnet.com",
+    secret.qtest.qa.apiToken,
+    PROJECT_ID,
+  );
+
+  const result = await syncTestCases(
+    client,
+    {
+      parentModuleId: MODULE_ID,
+      testsDirectory: "/path/to/.qtest/test-cases/feature",
+      createSubmodules: true,
+      fileToSubmoduleMapping: {
+        "AuthTest.json": "Authentication",
+        "Flow1Test.json": "Flow 1 Tests",
+      },
+    },
+    PROJECT_ID,
+  );
+
+  console.log(`✅ Created: ${result.created} tests`);
+  console.log(`✅ Submodules: ${result.submodulesCreated.length}`);
+}
+
+main().catch(console.error);
+```
+
+### Critical MCP Best Practices
+
+1. **ALWAYS validate before sync:**
+
+   ```bash
+   node analyze-local-tests.js  # Check for issues
+   ```
+
+2. **NEVER sync multiple times without cleanup:**
+   - Result: 241 duplicates instead of 52 tests
+   - Solution: Run `deep-cleanup.js` before re-sync
+
+3. **ALWAYS verify after sync:**
+
+   ```bash
+   node cleanup-duplicates.js  # Should show 0 duplicates
+   ```
+
+4. **Document module IDs:**
+   - Update feature README.md
+   - Maintain `.qtest/MODULES.md` registry
+
+For detailed MCP lessons learned, see: `/automation-comosense/docs/LESSONS_LEARNED.md § qTest MCP Server Integration`
+
+---
+
+**Document Version**: 3.0  
+**Last Updated**: February 8, 2026  
 **Author**: QA Automation Team  
 **Related Documents**:
 
@@ -1619,8 +1895,6 @@ The **AI-Driven STLC Triple Workflow Strategy** provides:
 - `.github/prompts/do-prd.prompt.md` - PRD Generation (WORKFLOW C)
 - `.github/prompts/do-stp.prompt.md` - Software Test Plan Generation (WORKFLOW B & C)
 - `.github/prompts/do-std.prompt.md` - Software Test Design Generation (WORKFLOW B & C)
+- `/qtest-mcp-server/MCP-WORKFLOWS-GUIDE.md` - Detailed MCP usage examples
+- `/automation-comosense/docs/LESSONS_LEARNED.md` - qTest MCP integration lessons
 - `docs/AI STLC.pptx` - PowerPoint Presentation
-
-- [QA Workplan Prompt (Dual Workflow)](../.github/prompts/do-qa-workplan-v2.prompt.md)
-- [qTest CLI Commands](docs_qtest/QTEST_CLI_COMMANDS.md)
-- [qTest Team Presentation](docs_qtest/QTEST_TEAM_PRESENTATION.md)

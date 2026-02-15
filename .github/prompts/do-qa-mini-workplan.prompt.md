@@ -122,7 +122,7 @@ python3 java_parser.py <java-test-dir> --output test-cases/<module-name>
 ```bash
 cd .qtest
 python3 simple_sync.py test-cases/<module>/<file>.json <qtest-module-id> [--mode=smart]
-# Example: python3 simple_sync.py test-cases/p2c/AuthenticationTest.json 68280362
+# Example: python3 simple_sync.py test-cases/p2c/AuthenticationTest.json <module-id>
 ```
 
 **Modes:**

@@ -189,18 +189,20 @@ const folder = parent ? parent.name.toLowerCase().replace(/[^a-z0-9]/g, '') :
 console.log('Folder:', folder);
 "
 
-# Step 1b: Fetch ONLY automation tests and create JSON
-# Use fetch-automation-only.js script (auto-determines folder from parent module)
-# IMPORTANT: Specify correct workspace path (automation-web or automation-comosense)
-cd /path/to/qtest-mcp-server
-node fetch-automation-only.js {moduleId} /path/to/automation-web
-# OR for API tests:
-node fetch-automation-only.js {moduleId} /path/to/automation-comosense
-# Output: {workspace}/.qtest/test-cases/{parent-module-folder}/{ModuleName}.json
+# Step 1b: Fetch ONLY automation tests (Type=702) and create JSON
+# ⚠️ IMPORTANT: This automatically filters for automation tests only (Type=702)
+# Manual tests (Type=701) stay in qTest/STD documentation
 
-# OR manually using qtest CLI (fetches ALL, must filter manually):
-qtest fetch --module {moduleId} --output {workspace}/.qtest/test-cases/{parent-module-folder}/{Module}.json
-# Then manually remove manual tests from JSON
+# RECOMMENDED - Workflow A (qTest-First): Search and sync by module name
+cd /path/to/qtest-mcp-server
+node search-deep.js "<module-name-to-search>"
+# Example: node search-deep.js "agent promo accessibility"
+#   - Searches 82 modules by name
+#   - Shows module hierarchy path
+#   - Auto-syncs if single match found
+#   - Creates JSON with ONLY automation tests (Type=702)
+# Output: {workspace}/.qtest/test-cases/{parent-folder}/{module-name}/{module-name}.json
+
 # {workspace} = automation-web for UI tests, automation-comosense for API tests
 
 # Step 2: (Optional) Generate test code skeleton

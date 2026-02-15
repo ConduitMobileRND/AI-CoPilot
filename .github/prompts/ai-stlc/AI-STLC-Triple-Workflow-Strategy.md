@@ -579,19 +579,33 @@ sequenceDiagram
 ```bash
 # Phase 1: Generate JSON Files from qTest
 # ⚠️ KEY STEP: Create local JSON files with qTestPID from existing qTest tests
+# ⚠️ FILTERS: Only automation tests (Type=702) are included in JSON files
+#            Manual tests (Type=701) stay in qTest/STD documentation only
+
 cd /path/to/qtest-mcp-server
 
+# RECOMMENDED - Workflow A: Search and sync by module name
+node search-deep.js "<module-name-to-search>"
+# Example: node search-deep.js "agent promo accessibility"
+#   - Searches all modules by name
+#   - Shows full hierarchy path
+#   - Auto-syncs if single match found
+#   - Filters: ONLY automation tests (Type=702) in JSON
+
+# OR if you already know the module ID:
 QTEST_PROJECT_ID=124660 \
-QTEST_MODULE_ID=67588436 \
+QTEST_MODULE_ID=<module-id> \
 QTEST_TESTS_DIR=/path/to/automation-web/.qtest/test-cases \
 node create-json-from-qtest.js
 
 # Output:
-# ✅ Found 20 test cases in qTest
-# ✅ Created: 20 JSON files
+# ℹ️  Found 20 total tests: 10 automation, 10 manual
+# ✅ Including ONLY 10 automation tests in JSON
+# 📝 10 manual tests will stay in STD documentation
+# ✅ Created: 1 JSON file
 #    - advanced-purchase-with-points.json (PID: TC-10)
 #    - points-payment-flow.json (PID: TC-13)
-#    - ... (18 more files)
+#    - ... (8 more tests)
 # ✅ JSON files already have qTestPID assigned from qTest!
 
 # Phase 2: Review Generated JSON Files
@@ -633,14 +647,14 @@ npm run test:agent:qa -- agent-test-cases.spec.ts
 # Phase 6: Sync Results Back to qTest
 cd ../qtest-mcp-server
 
-qtest sync --module 67588436 \
+qtest sync --module <module-id> \
   --tests-dir /path/to/automation-web/.qtest/test-cases/ \
   --create-submodules
 
 # Output:
-# ✅ Synced 20 test results to qTest
-# ✅ Module ID: 67588436
-# ✅ Pass: 18, Fail: 2
+# ✅ Synced 10 test results to qTest
+# ✅ Module ID: <module-id>
+# ✅ Pass: 8, Fail: 2
 # ✅ JSON files already have PIDs (no reverse-sync needed!)
 
 # Phase 7: Create Test Cycle in qTest

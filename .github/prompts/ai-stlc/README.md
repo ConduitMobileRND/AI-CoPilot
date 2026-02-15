@@ -26,7 +26,7 @@ This master orchestrator will:
 
 ## 🔄 The Three Workflows
 
-### � WORKFLOW A: qTest-First
+### 🟢 WORKFLOW A: qTest-First
 
 _Existing qTest modules_
 

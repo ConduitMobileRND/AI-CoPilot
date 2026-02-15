@@ -1,30 +1,104 @@
 # AI-STLC Prompts Navigation Guide
 
 > **Quick Reference:** Which prompt to use and when
+> **Last Updated:** February 15, 2026 | **Version:** 2.0
 
 ---
 
-## 🎯 Start Here
+## 🚀 Quick Start (30 seconds)
 
-### **Master Entry Point**
+### **Option 1: I have a qTest Module ID**
+```
+"{moduleId}"
+```
+Example: `"TR-123"` or `"45678"`
+
+### **Option 2: I have requirements/PRD/feature request**
+```
+"Start AI-STLC workflow for [feature-name]"
+```
+Example: `"Start AI-STLC workflow for payment cashback feature"`
+
+### **Option 3: I'm not sure where to start**
+```
+"Start AI-STLC workflow"
+```
+
+**All routes go through:** [`do-stlc-start.prompt.md`](do-stlc-start.prompt.md)
+
+---
+
+## 🎯 Master Entry Point
 
 ```
 do-stlc-start.prompt.md
 ```
 
-**Always start with this.** It will detect your project and tell you which workflow and prompts to use.
+**Always start with this.** It will:
+1. ✅ Detect your project artifacts (PRD, qTest, code)
+2. ✅ Recommend the best workflow (A, B, or C)
+3. ✅ Tell you the exact next prompt to run
+4. ✅ Provide expected inputs and outputs
 
 ---
 
 ## 📋 Complete Workflow Maps
 
-### 🔵 WORKFLOW A: Code-First
+### 🟢 WORKFLOW A: qTest-First
 
-_For new features with PRD, no qTest module yet_
+_For existing qTest modules with defined test cases_
+
+```
+┌──────────────────────────────────────────────────┐
+│  WORKFLOW A: qTest-First (Existing Test Suite)  │
+└──────────────────────────────────────────────────┘
+
+Step 1: Generate Implementation Plans
+  🔧 qTest CLI command or npm script
+  📥 Input:  qTest Module ID
+  📤 Output: N markdown files (one per test case)
+  ⏱️  Time:   15-30 min (automated)
+          ↓
+Step 2: Generate Code Skeleton
+  🔧 qTest CLI command or npm script
+  📥 Input:  qTest Module ID
+  📤 Output: 1 test file skeleton with all test cases
+  ⏱️  Time:   15-30 min (automated)
+          ↓
+Step 3: Implement Test Logic
+  🛠️  Manual with AI assistance (GitHub Copilot)
+  📥 Input:  Code skeleton + markdown plans
+  📤 Output: Complete test implementation
+  ⏱️  Time:   3-6 days (depending on test count)
+          ↓
+Step 4: Sync Results Back to qTest
+  🔧 .qtest/simple_sync.py (smart sync)
+  📤 Output: qTest execution results updated
+  ⏱️  Time:   15 min
+```
+
+**Commands:**
+
+```bash
+# Step 1: Generate plans
+npm run qtest:generate -- --module-id <MODULE_ID>
+
+# Step 2: Generate code
+npm run qtest:generate -- --module-id <MODULE_ID> --generate-code
+
+# Step 4: Sync results
+npm run qtest:sync -- --module <module-name>
+```
+
+---
+
+### 🔵 WORKFLOW B: Code-First
+
+_For new features starting from PRD/requirements_
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│  WORKFLOW A: Code-First (New Feature Development)  │
+│  WORKFLOW B: Code-First (New Feature Development)  │
 └─────────────────────────────────────────────────────┘
 
 Step 1: Generate Software Test Plan
@@ -65,54 +139,6 @@ Step 1: do-mini-std.prompt.md (combines STP+STD)
 Step 2: do-qa-mini-workplan.prompt.md
 Step 3: Implement
 Step 4: Sync
-```
-
----
-
-### 🟢 WORKFLOW B: qTest-First
-
-_For existing qTest modules with defined test cases_
-
-```
-┌──────────────────────────────────────────────────┐
-│  WORKFLOW B: qTest-First (Existing Test Suite)  │
-└──────────────────────────────────────────────────┘
-
-Step 1: Generate Implementation Plans
-  🔧 qTest CLI command or npm script
-  📥 Input:  qTest Module ID
-  📤 Output: N markdown files (one per test case)
-  ⏱️  Time:   15-30 min (automated)
-          ↓
-Step 2: Generate Code Skeleton
-  🔧 qTest CLI command or npm script
-  📥 Input:  qTest Module ID
-  📤 Output: 1 test file skeleton with all test cases
-  ⏱️  Time:   15-30 min (automated)
-          ↓
-Step 3: Implement Test Logic
-  🛠️  Manual with AI assistance (GitHub Copilot)
-  📥 Input:  Code skeleton + markdown plans
-  📤 Output: Complete test implementation
-  ⏱️  Time:   3-6 days (depending on test count)
-          ↓
-Step 4: Sync Results Back to qTest
-  🔧 .qtest/simple_sync.py (smart sync)
-  📤 Output: qTest execution results updated
-  ⏱️  Time:   15 min
-```
-
-**Commands:**
-
-```bash
-# Step 1: Generate plans
-npm run qtest:generate -- --module-id <MODULE_ID>
-
-# Step 2: Generate code
-npm run qtest:generate -- --module-id <MODULE_ID> --generate-code
-
-# Step 4: Sync results
-npm run qtest:sync -- --module <module-name>
 ```
 
 ---

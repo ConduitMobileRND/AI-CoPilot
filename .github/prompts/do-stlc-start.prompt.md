@@ -5,9 +5,9 @@
 > **⭐ Always start here.** This is the main prompt that routes you to the appropriate workflow and next steps.
 
 **Architecture:**
+
 - **This prompt (`do-stlc-start.prompt.md`)** → Primary entry point (use this)
 - **AI-STLC-Triple-Workflow-Strategy.md** → Detailed strategy reference (linked from here)
-- **AI-STLC-Complete-Guide.md** → Presentation/training material ONLY (not a prompt)
 
 ---
 
@@ -30,6 +30,7 @@ This master orchestrator will:
 ## ⚠️ **CRITICAL RULE: Automation Tests Only in JSON**
 
 **When fetching from qTest:**
+
 - ✅ **JSON files** = ONLY automation tests (Type field = "Automation" or value "702")
 - 📝 **Manual tests** = Stay in STD/mini-STD documentation ONLY
 - ⛔ **NEVER** include manual tests in JSON files
@@ -51,6 +52,7 @@ If you already know the qTest module ID, provide it directly:
 ```
 
 **I will:**
+
 - ✅ Skip workspace detection
 - ✅ Analyze test types in the module (Automation vs Manual)
 - ✅ Fetch ONLY automation tests (Type=702) for JSON file
@@ -71,6 +73,7 @@ If you need help determining the workflow:
 ```
 
 **I will:**
+
 - ✅ Scan workspace for artifacts
 - ✅ Analyze project state
 - ✅ Recommend optimal workflow
@@ -81,6 +84,35 @@ If you need help determining the workflow:
 ## Step 1: Project Context Detection (Only for Option 2)
 
 **Note:** If you provided a specific qTest module ID, I will skip this step and fetch test cases directly.
+
+**⚠️ CRITICAL FIRST STEP: Analyze Existing Module Documentation**
+
+Before recommending any workflow, ALWAYS scan for existing test documentation in the module:
+
+```bash
+# Check for existing module documentation
+ls docs/{module}/              # e.g., docs/p2c/, docs/hub/, docs/agent/
+grep -r "test" docs/{module}/  # Look for test-related docs
+```
+
+**If existing STP/STD/QA-Workplan found:**
+
+- ✅ **Read and analyze** existing patterns:
+  - Automation strategy (e.g., 80% automation / 20% manual for P2C)
+  - Environment structure (e.g., QA + Production only)
+  - Test case count baseline
+  - Naming conventions and folder structure
+- ✅ **Use as template** for new feature documentation
+- ✅ **Maintain consistency** with established practices
+
+**Example: P2C Module**
+
+```bash
+ls docs/p2c/
+# Found: p2c-stp.md, p2c-std.md, qa-workplan.md, design.md, prd.md
+# Analysis: 80/20 automation, QA+Prod envs, ~20-30 test cases per feature
+# Action: Use same pattern for new P2C features (e.g., Localization)
+```
 
 When doing full workflow analysis, I will scan your workspace for:
 
@@ -95,13 +127,18 @@ When doing full workflow analysis, I will scan your workspace for:
 - [ ] Existing test code (check for implemented test classes)
 - [ ] Change requests / JIRA tickets (for enhancements)
 - [ ] lessons-learned.md (for context)
- 
+
 ### Project Structure
 
-- [ ] Test framework (Playwright/Jest/TestNG/Pytest)
+- [ ] **All available test frameworks** (Playwright/Jest/TestNG/Pytest) — Detect ALL frameworks in workspace
+- [ ] **Feature-component framework mapping:**
+  - Backend/API components → Java + RestAssured + TestNG
+  - UI components (Agent/Hub/Portal) → Playwright/TypeScript
+  - Data/Cloud/SQL/MongoDB → automation-llm-validation
 - [ ] Programming language (TypeScript/Java/Python)
 - [ ] Build tool (npm/Maven/Gradle)
-- [ ] Test locations and structure
+- [ ] Test locations and structure (per component)
+- [ ] **Primary framework for this specific feature** (based on component analysis)
 
 ### qTest Integration
 
@@ -116,9 +153,9 @@ When doing full workflow analysis, I will scan your workspace for:
 
 Based on detected artifacts, I will select:
 
-### � WORKFLOW A: qTest-First
+### 🟢 WORKFLOW A: qTest-First
 
-**Selected when:**
+\*\*Selected when:
 
 - ✅ qTest module exists with test cases
 - ✅ Test cases already defined and reviewed
@@ -137,6 +174,7 @@ Based on detected artifacts, I will select:
 ```
 
 **CLI Commands:**
+
 ```bash
 # Step 1a: FIRST - Analyze module hierarchy and test types
 # Determine parent module for correct folder structure
@@ -144,9 +182,9 @@ node -e "
 import { QTestClient } from './dist/qtest-client.js';
 const client = new QTestClient();
 const module = await client.makeRequest('GET', '/projects/{projectId}/modules/{moduleId}');
-const parent = module.parent_id ? 
+const parent = module.parent_id ?
   await client.makeRequest('GET', '/projects/{projectId}/modules/' + module.parent_id) : null;
-const folder = parent ? parent.name.toLowerCase().replace(/[^a-z0-9]/g, '') : 
+const folder = parent ? parent.name.toLowerCase().replace(/[^a-z0-9]/g, '') :
   module.name.toLowerCase().replace(/[^a-z0-9]/g, '');
 console.log('Folder:', folder);
 "
@@ -170,8 +208,12 @@ qtest generate-code --module {moduleId} \
   --framework {playwright|testng|pytest} \
   --output packages/{package}/tests/
 
-# Step 3-5: Implement, run, validate
-npm test  # or mvn test, pytest
+# Step 3 Implement test logic based on JSON specifications
+based on this prompr do-implement-tests.prompt.md
+**do-implement-tests.prompt.md** → Detailed prompt reference (linked from here)
+
+# Step 4-5: run, validate
+npm test  # or mvn test, node ,pytest
 
 cd {workspace}
 qtest sync --module {moduleId} \
@@ -180,12 +222,13 @@ qtest sync --module {moduleId} \
 ```
 
 **Workspace Paths:**
+
 - **UI/Web Tests:** `/path/to/automation-web/.qtest/test-cases/{parent-folder}/`
 - **API Tests:** `/path/to/automation-comosense/.qtest/test-cases/{parent-folder}/`
 - **NOT in qtest-mcp-server** - That's just the CLI tool!-create-submodules
-```
 
 **Folder Structure Logic:**
+
 - If module has parent: Use parent module name as folder (e.g., Hub → `hub/`)
 - If module is root: Use module name as folder (e.g., P2C → `p2c/`)
 - Folder name: lowercase, alphanumeric only
@@ -201,6 +244,7 @@ qtest sync --module {moduleId} \
 - Test implementation files (`.spec.ts` for web, `.java` for API)
 
 **Important:**
+
 - ⚠️ JSON files contain ONLY automation tests (Type=702)
 - 📝 Manual tests remain in STD documentation
 - ✅ Always verify test type before adding to JSON
@@ -211,7 +255,7 @@ qtest sync --module {moduleId} \
 
 ### 🔵 WORKFLOW B: Code-First (New Features & Enhancements)
 
-**Selected when:**
+\*\*Selected when:
 
 - ✅ PRD or requirements documents exist (or need updating)
 - ✅ No qTest module yet OR qTest has <10 test cases
@@ -240,20 +284,23 @@ qtest sync --module {moduleId} \
 **Variant A - New Feature:**
 
 ```
-1. Requirements (JIRA/PRD)   → Input document
-2. do-mini-std.prompt.md     → Generate minimal STD (all test cases: manual + automation)
-3. Extract automation tests  → Create JSON files (.qtest/test-cases/) for automation type only
-4. [Implement tests]         → Write test code (automation tests only)
-5. [Verify implementation]   → Run tests locally, ensure all pass
-6. [Validate before sync]    → npm run validate:pids (check PID synchronization)
-7. [Sync to qTest]           → qtest sync --module {moduleId} --tests-dir ./.qtest/test-cases/{package}/
+
+1. Requirements (JIRA/PRD) → Input document
+2. do-mini-std.prompt.md → Generate minimal STD (all test cases: manual + automation)
+3. Extract automation tests → Create JSON files (.qtest/test-cases/) for automation type only
+4. [Implement tests] → Write test code (automation tests only)
+5. [Verify implementation] → Run tests locally, ensure all pass
+6. [Validate before sync] → npm run validate:pids (check PID synchronization)
+7. [Sync to qTest] → qtest sync --module {moduleId} --tests-dir ./.qtest/test-cases/{package}/
    - Auto-creates qTest submodules
    - Smart duplicate detection
    - Uploads all test cases from JSON files
    - Auto-updates JSON with new PIDs
+
 ```
 
 **CLI Commands:**
+
 ```bash
 # Step 3: Create JSON specs (manually or AI-assisted)
 # .qtest/test-cases/{package}/NewFeature.json
@@ -297,6 +344,7 @@ git commit -m "Add new feature tests - TC-XXX through TC-YYY"
 ```
 
 **CLI Commands:**
+
 ```bash
 # Step 3: Pre-sync checks
 qtest check --module {moduleId} --verbose
@@ -345,6 +393,7 @@ qtest sync --module {moduleId} \
 ```
 
 **CLI Commands:**
+
 ```bash
 # Steps 1-5: Generate docs and create JSON specs
 # ... AI-assisted documentation generation ...
@@ -387,6 +436,7 @@ git commit -m "Add large feature tests - TC-XXX through TC-YYY"
 ```
 
 **CLI Commands:**
+
 ```bash
 # Step 3: Pre-sync checks
 qtest check --module {moduleId} --verbose
@@ -441,6 +491,7 @@ qtest sync --module {moduleId} \
 ```
 
 **CLI Commands:**
+
 ```bash
 # Steps 1-6: Generate documentation and create JSON specs
 # ... AI-assisted documentation generation ...
@@ -573,7 +624,7 @@ I will provide:
 → **Tools:** Use .qtest/simple_sync.py for reliable sync
 ```
 
-```markdown
+````markdown
 ## ✅ NEXT STEP (Quick Path - Enhancement)
 
 **Step 1: Review Change Request**
@@ -605,16 +656,20 @@ I will provide:
 **Step 6: Sync to qTest**
 
 → **Pre-Validation:** `npm run validate:pids` (check JSON ↔ Java sync)
-→ **Sync Command:** 
+→ **Sync Command:**
+
 ```bash
 qtest sync --module {moduleId} \
   --tests-dir ./.qtest/test-cases/{package}/ \
   --create-submodules
 ```
+````
+
 → **Validates:** Duplicate detection and auto-submodule creation
 → **Expected:** Test cases sync to qTest with proper hierarchy
 → **Note:** JSON files auto-updated with qTestPID for new tests
-```
+
+````
 
 ### ✅ NEXT STEP Instructions (Full Path - New Feature or Major Enhancement)
 
@@ -655,16 +710,18 @@ qtest sync --module {moduleId} \
 **Step 6: Validate & Sync to qTest**
 
 → **Pre-Validation:** `npm run validate:pids` (check JSON ↔ Java sync)
-→ **Sync Command:** 
+→ **Sync Command:**
 ```bash
 qtest sync --module {moduleId} \
   --tests-dir ./.qtest/test-cases/{package}/ \
   --create-submodules
-```
+````
+
 → **Post-Validation:** `npm run validate:pids` (verify PIDs added)
 → **Verify:** Check qTest for correct test count and submodule hierarchy
 → **Note:** JSON files auto-updated with qTestPID for new tests
-```
+
+````
 
 ```markdown
 ## ✅ NEXT STEP (Full Path - Major Enhancement)
@@ -699,16 +756,18 @@ qtest sync --module {moduleId} \
 
 → **Pre-Check:** `qtest check --module {moduleId} --verbose` (verify existing tests)
 → **Pre-Validation:** `npm run validate:pids` (check JSON ↔ Java sync)
-→ **Sync Command:** 
+→ **Sync Command:**
 ```bash
 qtest sync --module {moduleId} \
   --tests-dir ./.qtest/test-cases/{package}/ \
   --create-submodules
-```
+````
+
 → **Post-Validation:** `npm run validate:pids` (verify PIDs updated)
 → **Verify:** Check qTest for correct test count and no duplicates
 → **Note:** JSON files auto-updated with qTestPID for new tests
-```
+
+````
 
 ### ✅ NEXT STEP Instructions (qTest-First)
 
@@ -738,11 +797,11 @@ qtest sync --module {moduleId} \
 → **Test locally** until all tests pass
 → **Validation:** `npm run validate:pids` (verify JSON ↔ Java sync)
 → **No markdown plans needed** - JSON is single source of truth
-```
+````
 
 ### ✅ NEXT STEP Instructions (Change Request / Enhancement)
 
-```markdown
+````markdown
 ## ✅ NEXT STEP (Change Request)
 
 **Step 1: Review Change Request**
@@ -781,24 +840,29 @@ qtest sync --module {moduleId} \
 **Step 7: Validate & Sync**
 
 → **Pre-Validation:** `npm run validate:pids` (check JSON ↔ Java sync)
-→ **Sync Command:** 
+→ **Sync Command:**
+
 ```bash
 qtest sync --module {moduleId} \
   --tests-dir ./.qtest/test-cases/{package}/ \
   --create-submodules
 ```
+````
+
 → **Post-Validation:** `npm run validate:pids` (verify PIDs updated)
 → **Note:** JSON files auto-updated with qTestPID for new tests
 
 **Step 8: Git Commit**
 
-→ **Add Changes:** 
+→ **Add Changes:**
+
 ```bash
 git add .qtest/test-cases/{package}/{Module}.json
 git add rest-api/src/test/java/.../
 git commit -m "feat: Update {Module} tests - {JIRA-ID}"
 ```
-```
+
+````
 → **Preserve:** Existing test case structure and qTestPID references
 
 **Step 4: Update Test Code**
@@ -816,16 +880,18 @@ git commit -m "feat: Update {Module} tests - {JIRA-ID}"
 **Step 6: Validate & Sync to qTest**
 
 → **Pre-Validation:** `npm run validate:pids` (check JSON ↔ Java sync)
-→ **Sync Command:** 
+→ **Sync Command:**
 ```bash
 qtest sync --module {moduleId} \
   --tests-dir ./.qtest/test-cases/{package}/ \
   --create-submodules
-```
+````
+
 → **Post-Validation:** `npm run validate:pids` (verify PIDs updated)
 → **Verify:** Check qTest for correct updates and no duplicates
 → **Traceability:** Link to change request/JIRA ticket in qTest
 → **Note:** JSON files auto-updated with qTestPID for new tests
+
 ```
 
 ---
@@ -843,19 +909,19 @@ qtest sync --module {moduleId} \
 Q2{PRD or<br/>requirements<br/>exist?}
 Q3{Any system<br/>documentation?}
 
-    WF_A[🟢 WORKFLOW A<br/>qTest-First<br/><br/>Next: Create JSON file<br/>.qtest/test-cases/]
-    WF_B[🔵 WORKFLOW B<br/>Code-First<br/><br/>Next: do-stp.prompt.md]
+    WF_A[� WORKFLOW A<br/>Code-First<br/><br/>Next: do-stp.prompt.md]
+    WF_B[🟢 WORKFLOW B<br/>qTest-First<br/><br/>Next: Create JSON file<br/>.qtest/test-cases/]
     WF_C[🟠 WORKFLOW C<br/>Reverse Engineering<br/><br/>Next: do-design.prompt.md]
 
     START --> Q1
-    Q1 -->|Yes| WF_A
+    Q1 -->|Yes| WF_B
     Q1 -->|No| Q2
-    Q2 -->|Yes| WF_B
+    Q2 -->|Yes| WF_A
     Q2 -->|No| Q3
-    Q3 -->|Yes| WF_B
+    Q3 -->|Yes| WF_A
     Q3 -->|No| WF_C
 
-````
+```
 
 ---
 
@@ -877,7 +943,7 @@ When qTest module exists, follow these steps:
 # Use qTest MCP Server generateTestCode() function
 # Or manually create JSON file
 # Location: .qtest/test-cases/{package}/{Module}.json
-````
+```
 
 **automation-comosense (Java/API):**
 
@@ -907,11 +973,14 @@ When qTest module exists, follow these steps:
   ]
 }
 ```
+
       "type": "Automation"
     }
-  ]
+
+]
 }
-```
+
+````
 
 ### Step 3: Generate Code Skeleton (Optional)
 
@@ -922,7 +991,7 @@ When qTest module exists, follow these steps:
 qtest generate-code --spec ./.qtest/test-cases/{package}/{Module}.json
 
 # Output: Test code skeleton that needs manual completion
-```
+````
 
 **automation-web:**
 AI-assisted code generation using qtest CLI, or write manually
@@ -975,20 +1044,22 @@ qtest sync --module {moduleId} \
 # Verify sync results (expected count, no duplicates)
 # Note: JSON files auto-updated with qTestPID for new tests
 ```
-equirements<br/>exist?}
-    Q3{Any system<br/>documentation?}
 
-    WF_B[🟢 WORKFLOW B<br/>qTest-First<br/><br/>Next: qTest CLI commands]
-    WF_A[🔵 WORKFLOW A<br/>Code-First<br/><br/>Next: do-stp.prompt.md]
+equirements<br/>exist?}
+Q3{Any system<br/>documentation?}
+
+    WF_A[🟢 WORKFLOW A<br/>qTest-First<br/><br/>Next: qTest CLI commands]
+    WF_B[🔵 WORKFLOW B<br/>Code-First<br/><br/>Next: do-stp.prompt.md]
     WF_C[🟠 WORKFLOW C<br/>Reverse Engineering<br/><br/>Next: do-design.prompt.md]
 
     START --> Q1
-    Q1 -->|Yes| WF_B
+    Q1 -->|Yes| WF_A
     Q1 -->|No| Q2
-    Q2 -->|Yes| WF_A
+    Q2 -->|Yes| WF_B
     Q2 -->|No| Q3
-    Q3 -->|Yes| WF_A
+    Q3 -->|Yes| WF_B
     Q3 -->|No| WF_C
+
 ```
 
 ---
@@ -1027,14 +1098,18 @@ I'll tell you when this quick path is appropriate.
 
 **For qTest Module ID:**
 ```
+
 Provide just the module ID: "{moduleId}"
 Or: "Fetch tests from qTest module {moduleId}"
+
 ```
 
 **For General Workflow:**
 ```
+
 Say: "Start AI-STLC workflow"
 Or: "Start AI-STLC for [feature-name]"
+
 ```
 
 ---
@@ -1044,9 +1119,11 @@ Or: "Start AI-STLC for [feature-name]"
 If you want to force a specific workflow:
 
 ```
-"Use WORKFLOW A (Code-First) for [feature]"
-"Use WORKFLOW B (qTest-First) for [feature]"
+
+"Use WORKFLOW A (qTest-First) for [feature]"
+"Use WORKFLOW B (Code-First) for [feature]"
 "Use WORKFLOW C (Reverse Engineering) for [feature]"
+
 ```
 
 ---
@@ -1057,21 +1134,26 @@ If you want to force a specific workflow:
 
 **You say:**
 ```
+
 "{moduleId}"
+
 ```
 
 **I respond:**
 ```
+
 🔄 Fetching test cases from qTest module {moduleId}...
 ✅ Found N test cases in "{Module Name}"
 ✅ JSON file created: .qtest/test-cases/{package}/{Module}.json
 
 📋 Test Cases:
+
 1. TC-XXX: Test case 1
 2. TC-YYY: Test case 2
-... (N more)
+   ... (N more)
 
 ✅ NEXT STEP: Implement tests in packages/{package}/tests/{module}.spec.ts
+
 ```
 
 ---
@@ -1081,13 +1163,17 @@ If you want to force a specific workflow:
 **You say:**
 
 ```
+
 "Start AI-STLC workflow for payment wallet feature"
+
 ```
 
 **I respond:**
 
 ```
+
 ## Project Detection Results
+
 ✅ PRD found: docs/prd/payment-wallet-prd.md
 ❌ qTest module: Not found
 ✅ Framework: Playwright
@@ -1095,15 +1181,19 @@ If you want to force a specific workflow:
 ## Selected Workflow: 🔵 WORKFLOW B (Code-First)
 
 ## ✅ NEXT STEP
+
 → Run: do-stp.prompt.md
 → Input: docs/prd/payment-wallet-prd.md
 → Output: docs/doc_cp/payment-wallet-stp.md
+
 ```
 
 **You then say:**
 
 ```
+
 "Generate STP from docs/prd/payment-wallet-prd.md using do-stp.prompt.md"
+
 ```
 
 _(Process continues with clear NEXT STEP at each stage)_
@@ -1115,15 +1205,19 @@ _(Process continues with clear NEXT STEP at each stage)_
 ### **Option 1: Fetch from qTest Module**
 Provide the module ID directly:
 ```
+
 "{moduleId}"
 "Fetch tests from module {moduleId}"
+
 ```
 
 ### **Option 2: Start Workflow Analysis**
 Request general workflow guidance:
 ```
+
 "Start AI-STLC workflow"
 "Start AI-STLC for [feature-name]"
+
 ```
 
 ---
@@ -1144,7 +1238,8 @@ Request general workflow guidance:
 
 ---
 
-**Version:** 2.1  
-**Last Updated:** February 9, 2026  
-**Purpose:** ⭐ PRIMARY ENTRY POINT for all AI-STLC workflows - Routes to appropriate workflow based on input  
+**Version:** 2.1
+**Last Updated:** February 9, 2026
+**Purpose:** ⭐ PRIMARY ENTRY POINT for all AI-STLC workflows - Routes to appropriate workflow based on input
 **Usage:** Provide either a qTest module ID for immediate fetch OR request general workflow analysis
+```

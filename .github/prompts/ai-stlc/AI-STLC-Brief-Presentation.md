@@ -18,13 +18,13 @@
 
 ---
 
-## <span style="font-size: 1.8em;">✅ That is How a new Triple Workflow Strategy Solves These Problems</span>
+## <span style="font-size: 1.8em;">✅ So - How a new Triple Workflow Strategy solves these Problems</span>
 
-### <span style="font-size: 1.5em;">**1. 🎮 Complete Control Over Each Step**</span>
+### <span style="font-size: 1.5em;">** 🎮 Work in VS code and Control Over Each Step by using dedicated prompt files **</span>
 
 **<span style="font-size: 1.8em;">You decide when to proceed</span>** <span style="font-size: 1.5em;">- AI guides but doesn't auto-execute</span>
 
-<span style="font-size: 1.4em;">
+<span style="font-size: 1.6em;">
 
 - ✅ Review AI-generated outputs before proceeding
 - ✅ Make adjustments at any stage
@@ -38,31 +38,13 @@
 
 ---
 
-### <span style="font-size: 1.5em;">**2. 🔀 Flexibility for Any Scenario**</span>
-
-**<span style="font-size: 1.8em;">Three distinct paths</span>** <span style="font-size: 1.5em;">adapt to your actual project state:</span>
-
-<span style="font-size: 1.4em;">
-
-- 🟢 **Workflow A (qTest-First):** qTest module exists → Start from qTest
-  - **Use case:** Product team already defined 50 test cases in qTest {moduleId}
-  - **Benefit:** Skip docs, jump straight to implementation
-- 🔵 **Workflow B (Code-First):** Have requirements → Start from docs
-  - **Quick Path:** Small features (5-10 tests) → mini-STD
-  - **Full Path:** Large features (30+ tests) → STP → STD
-  - **Use case:** New feature with PRD, no qTest module yet
-  - **Benefit:** Generate docs first, sync to qTest after implementation
-- 🟠 **Workflow C (Reverse Engineering):** Legacy code only → Reverse engineer first
-  - **Use case:** Old codebase with no docs or tests
-  - **Benefit:** AI generates design docs → PRD → STP/STD from existing code
-
 </span>
 
 **<span style="font-size: 1.5em;">No forcing square pegs into round holes</span>** <span style="font-size: 1.4em;">- AI analyzes your project and selects the right workflow</span>
 
 ---
 
-### <span style="font-size: 1.5em;">**3. 🎯 Clear Next Steps at Every Stage**</span>
+### <span style="font-size: 1.5em;">** 🎯 Clear Next Steps at Every Stage**</span>
 
 **<span style="font-size: 1.8em;">AI orchestration provides exact commands:</span>**
 
@@ -87,114 +69,12 @@
 
 ---
 
-## <span style="font-size: 1.8em;">📊 Simple Workflow Overview</span>
-
-```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'fontSize':'28px', 'fontFamily':'arial'}}}%%
-flowchart LR
-    START([<span style='font-size:26px'>🎯 Start AI-STLC<br/>Module ID or Analysis</span>]) --> ANALYZE[<span style='font-size:24px'>🔍 Analyze<br/>Project State</span>]
-    ANALYZE --> RECOMMEND[<span style='font-size:24px'>🤖 AI Recommends<br/>Workflow</span>]
-    RECOMMEND --> JSON[<span style='font-size:24px'>📄 Create JSON<br/>.qtest/test-cases/</span>]
-    JSON --> IMPL_CYCLE{{<span style='font-size:24px'>💻 Implementation Cycle</span>}}
-
-    IMPL_CYCLE --> IMPLEMENT[<span style='font-size:24px'>Write Code</span>]
-    IMPLEMENT --> RUN[<span style='font-size:24px'>Run Tests</span>]
-    RUN --> CHECK{<span style='font-size:24px'>Pass?</span>}
-    CHECK -->|No| REGRESSION{<span style='font-size:24px'>Has<br/>Regression?</span>}
-    CHECK -->|Yes| UPDATE
-    REGRESSION -->|Yes| RUN_REG[<span style='font-size:24px'>Run Regression</span>]
-    REGRESSION -->|No| FIX[<span style='font-size:24px'>Fix Issues</span>]
-    RUN_REG --> REG_CHECK{<span style='font-size:24px'>Pass?</span>}
-    REG_CHECK -->|No| FIX
-    REG_CHECK -->|Yes| UPDATE
-    FIX --> IMPLEMENT
-
-    UPDATE[<span style='font-size:24px'>📝 Update Docs<br/>& Sync qTest</span>] --> COMPLETE([<span style='font-size:26px'>✅ Test Cycle<br/>Complete</span>])
-
-    style START fill:#e1f5ff,stroke:#0066cc,stroke-width:4px
-    style IMPL_CYCLE fill:#fff3cd,stroke:#856404,stroke-width:4px
-    style JSON fill:#f8d7da,stroke:#721c24,stroke-width:3px
-    style COMPLETE fill:#d4edda,stroke:#28a745,stroke-width:4px
-```
-
----
-
-## <span style="font-size: 1.8em;">🛠️ Tools That Power This Workflow ( Approved by Globalpay )</span>
-
-<span style="font-size: 1.4em;">
-
-### **1. 🤖 MCP (Model Context Protocol)**
-
-- AI-powered orchestration and workflow routing
-- Intelligent code generation and analysis
-- Automated test case extraction from documentation
-
-### **2. 📝 Prompt Templates**
-
-- **do-std.prompt.md** - Generate comprehensive Software Test Design
-- **do-mini-std.prompt.md** - Quick test design for small features
-- **do-stp.prompt.md** - Create Software Test Plan
-- **do-qa-workplan.prompt.md** - Generate QA implementation roadmap
-
-### **3. 🔧 Supporting Tools**
-
-- **qTest CLI** - Fast sync, validation, and module management
-- **Git** - Version control with auto PID tracking
-- **CI/CD Pipeline** - Automated testing and validation
-- **npm/Maven** - Build and test execution
-- **Validation Scripts** - Duplicate detection and consistency checks
-
-</span>
-
----
-
-## <span style="font-size: 1.8em;">🎯 Control Points Summary</span>
-
-<span style="font-size: 1.3em;">
-
-| Stage              | Control Point           | Your Decision          |
-| ------------------ | ----------------------- | ---------------------- |
-| **Start**          | Choose workflow path    | Module ID vs Analysis  |
-| **Planning**       | Review QA plan          | Approve or revise      |
-| **JSON**           | Review test definitions | Approve before coding  |
-| **Implementation** | Code quality            | When ready to commit   |
-| **Local Testing**  | Test results            | Fix before CI/CD       |
-| **CI/CD**          | Build status            | Fix before regression  |
-| **Regression**     | Full suite results      | Fix before sync        |
-| **Pre-Sync**       | Sync preview            | Approve sync plan      |
-| **Sync**           | qTest update            | Execute when ready     |
-| **Cycle**          | Continue or complete    | Next iteration or done |
-
-**You are in control at every step** - AI guides, validates, and automates, but YOU decide when to proceed.
-
-</span>
-
----
-
-## <span style="font-size: 1.8em;">📊 Quick Comparison: Manual vs AI-STLC</span>
-
-<span style="font-size: 1.3em;">
-
-| Activity                    | Manual Process         | AI-STLC Process    | Time Saved |
-| --------------------------- | ---------------------- | ------------------ | ---------- |
-| **Generate test plan**      | 4-8 hours writing      | 30 min AI-assisted | 75%        |
-| **Create JSON definitions** | 2-4 hours manual       | 15 min extraction  | 90%        |
-| **Sync to qTest**           | 30-45 min per feature  | 30 seconds         | 99%        |
-| **Validate duplicates**     | 1-2 hours manual check | Automatic          | 100%       |
-| **Create hierarchy**        | 15-20 min UI clicks    | Automatic          | 100%       |
-| **Update traceability**     | 30 min manual linking  | Automatic          | 100%       |
-| **Total per feature**       | 8-15 hours             | 2-4 hours          | **70-80%** |
-
-</span>
-
----
-
 ## <span style="font-size: 2.5em;">🔄 Complete AI-STLC Workflow</span>
 
 ```mermaid
 %%{init: {'theme':'base', 'themeVariables': { 'fontSize':'20px', 'fontFamily':'arial'}}}%%
 flowchart TD
-    START([<span style='font-size:18px'>🎯 Start AI-STLC<br/>Provide Module ID or Request Analysis</span>]) --> DETECT{<span style='font-size:18px'>Input Type?</span>}
+    START([<span style='font-size:18px'>🎯 Start AI-STLC<br/>PRD/Jira/qTestModule Request Analysis</span>]) --> DETECT{<span style='font-size:18px'>Input Type?</span>}
 
     DETECT -->|Module ID| DIRECT[<span style='font-size:18px'>⚡ Direct Fetch from qTest</span>]
     DETECT -->|General Request| ANALYZE[<span style='font-size:18px'>🔍 Analyze Project State</span>]
@@ -254,6 +134,89 @@ flowchart TD
     style SYNC fill:#d4edda,stroke:#28a745,stroke-width:3px
     style END fill:#d1ecf1,stroke:#0c5460,stroke-width:4px
 ```
+
+---
+
+## <span style="font-size: 1.8em;">🎯 Control Points Summary</span>
+
+<span style="font-size: 1.3em;">
+
+| Stage              | Control Point           | Your Decision          |
+| ------------------ | ----------------------- | ---------------------- |
+| **Start**          | Choose workflow path    | Module ID vs Analysis  |
+| **Planning**       | Review QA plan          | Approve or revise      |
+| **JSON**           | Review test definitions | Approve before coding  |
+| **Implementation** | Code quality            | When ready to commit   |
+| **Local Testing**  | Test results            | Fix before CI/CD       |
+| **CI/CD**          | Build status            | Fix before regression  |
+| **Regression**     | Full suite results      | Fix before sync        |
+| **Pre-Sync**       | Sync preview            | Approve sync plan      |
+| **Sync**           | qTest update            | Execute when ready     |
+| **Cycle**          | Continue or complete    | Next iteration or done |
+
+**You are in control at every step** - AI guides, validates, and automates, but YOU decide when to proceed.
+
+## <span style="font-size: 1.8em;">📊 Quick Comparison: Manual vs AI-STLC</span>
+
+<span style="font-size: 1.3em;">
+
+| Activity              | Manual Process | AI-STLC Process | Time Saved |
+| --------------------- | -------------- | --------------- | ---------- |
+| **Total per feature** | 8-15 hours     | 2-4 hours       | **70-80%** |
+
+</span>
+
+---
+
+### <span style="font-size: 1.5em;">**2. 🔀 Flexibility for Any Scenario**</span>
+
+**<span style="font-size: 1.8em;">Three distinct paths</span>** <span style="font-size: 1.5em;">adapt to your actual project state:</span>
+
+<span style="font-size: 1.4em;">
+
+- 🟢 **Workflow A (qTest-First):** qTest module exists → Start from qTest
+  - **Use case:** Product team already defined 50 test cases in qTest {moduleId}
+  - **Benefit:** Skip docs, jump straight to implementation
+
+- 🔵 **Workflow B (Code-First):** Have requirements → Start from docs
+  - **Quick Path:** Small features (5-10 tests) → mini-STD
+  - **Full Path:** Large features (30+ tests) → STP → STD
+  - **Use case:** New feature with PRD, no qTest module yet
+  - **Benefit:** Generate docs first, sync to qTest after implementation
+- 🟠 **Workflow C (Reverse Engineering):** Legacy code only → Reverse engineer first
+  - **Use case:** Old codebase with no docs or tests
+  - **Benefit:** AI generates design docs → PRD → STP/STD from existing code
+
+</span>
+
+---
+
+## <span style="font-size: 1.8em;">🛠️ Tools That Power This Workflow ( Approved by Globalpay )</span>
+
+<span style="font-size: 1.4em;">
+
+### **1. 🤖 MCP (Model Context Protocol)**
+
+- AI-powered orchestration and workflow routing
+- Intelligent code generation and analysis
+- Automated test case extraction from documentation
+
+### **2. 📝 Prompt Templates**
+
+- **do-std.prompt.md** - Generate comprehensive Software Test Design
+- **do-mini-std.prompt.md** - Quick test design for small features
+- **do-stp.prompt.md** - Create Software Test Plan
+- **do-qa-workplan.prompt.md** - Generate QA implementation roadmap
+
+### **3. 🔧 Supporting Tools**
+
+- **qTest CLI** - Fast sync, validation, and module management
+- **Git** - Version control with auto PID tracking
+- **CI/CD Pipeline** - Automated testing and validation
+- **npm/Maven** - Build and test execution
+- **Validation Scripts** - Duplicate detection and consistency checks
+
+</span>
 
 ---
 

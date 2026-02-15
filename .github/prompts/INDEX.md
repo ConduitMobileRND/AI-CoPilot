@@ -29,13 +29,27 @@ AI-CoPilot/
 
 ## 🎯 AI-STLC Testing Workflows
 
-**Location:** [`ai-stlc/`](ai-stlc/)
+**Location:** [`do-stlc-start.prompt.md`](do-stlc-start.prompt.md) (Master Entry Point)
 
 **Purpose:** Complete Software Testing Life Cycle automation with three complementary workflows
 
+**Quick Commands:**
+```bash
+# Option 1: Auto-detect and recommend
+"Start AI-STLC workflow"
+
+# Option 2: Provide qTest module ID
+"{moduleId}"
+
+# Option 3: Specific feature
+"Start AI-STLC workflow for [feature-name]"
+```
+
+---
+
 ### Master Entry Point
 
-- **[do-stlc-start.prompt.md](ai-stlc/do-stlc-start.prompt.md)** - Always start here for test automation
+- **[do-stlc-start.prompt.md](do-stlc-start.prompt.md)** ⭐ PRIMARY ENTRY - Always start here for test automation
 
 ### Workflow A & C Prompts (Code-First / Reverse Engineering)
 

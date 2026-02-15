@@ -139,8 +139,8 @@ graph TB
 
     subgraph "STLC Phase 3: Test Implementation"
         TI1[🔄 WORKFLOW DECISION]
-        TI2A[WORKFLOW A: Code-First]
-        TI2B[WORKFLOW B: qTest-First]
+        TI2A[WORKFLOW A: qTest-First]
+        TI2B[WORKFLOW B: Code-First]
     end
 
     subgraph "STLC Phase 4: Test Execution"
@@ -190,22 +190,22 @@ graph TD
 
     START --> DECISION
 
-    DECISION -->|qTest Module Exists| WFB[WORKFLOW B: qTest-First]
-    DECISION -->|PRD/Requirements Exist| WFA[WORKFLOW A: Code-First]
+    DECISION -->|qTest Module Exists| WFA[WORKFLOW A: qTest-First]
+    DECISION -->|PRD/Requirements Exist| WFB[WORKFLOW B: Code-First]
     DECISION -->|No Docs/Legacy System| WFC[WORKFLOW C: Reverse Engineering]
 
-    WFB --> GEN[Generate Plans from qTest]
-    GEN --> CODE_B[Generate Code Skeletons]
-    CODE_B --> IMPL_B_2[Implement Tests]
-    IMPL_B_2 --> SYNC_B_2[Sync Results Back to qTest]
+    WFA --> GEN[Generate Plans from qTest]
+    GEN --> CODE_A[Generate Code Skeletons]
+    CODE_A --> IMPL_A_2[Implement Tests]
+    IMPL_A_2 --> SYNC_A_2[Sync Results Back to qTest]
 
-    WFA --> READ[Read PRD/Requirements]
+    WFB --> READ[Read PRD/Requirements]
     READ --> GEN_STP[Generate STP - do-stp]
     GEN_STP --> GEN_STD[Generate STD - do-std]
     GEN_STD --> GEN_WP[Generate QA Workplan - do-qa-workplan]
-    GEN_WP --> IMPL_A[Implement Tests from Specs]
-    IMPL_A --> SYNC_A[Forward Sync to qTest]
-    SYNC_A --> CAPTURE[Capture New Module ID]
+    GEN_WP --> IMPL_B[Implement Tests from Specs]
+    IMPL_B --> SYNC_B[Forward Sync to qTest]
+    SYNC_B --> CAPTURE[Capture New Module ID]
 
     WFC --> REVERSE[Reverse Engineer System]
     REVERSE --> DESIGN_DOC[Create Design Document]
@@ -216,7 +216,7 @@ graph TD
     IMPL_C --> SYNC_C[Forward Sync to qTest]
     SYNC_C --> CAPTURE_C[Capture Module ID]
 
-    SYNC_B_2 --> COMPLETE[Test Cycle Creation]
+    SYNC_A_2 --> COMPLETE[Test Cycle Creation]
     CAPTURE --> COMPLETE
     CAPTURE_C --> COMPLETE
     COMPLETE --> REPORT[Automated Reporting]
@@ -226,16 +226,16 @@ graph TD
 
 | Scenario | Challenge | Solution |
 |----------|-----------|----------|
-| **Legacy System Migration** | 500+ test cases already in qTest | **WORKFLOW B**: Generate code from qTest, maintain traceability |
-| **New Feature Development** | PRD available, no qTest module yet | **WORKFLOW A**: Create STP/STD from PRD, implement, sync |
+| **Legacy System Migration** | 500+ test cases already in qTest | **WORKFLOW A**: Generate code from qTest, maintain traceability |
+| **New Feature Development** | PRD available, no qTest module yet | **WORKFLOW B**: Create STP/STD from PRD, implement, sync |
 | **Undocumented Legacy System** | No docs, no qTest, no PRD - only working system | **WORKFLOW C**: Reverse engineer, create design/PRD, then test |
-| **Rapid Prototyping** | Need to start testing immediately | **WORKFLOW A**: Code-first, sync documentation later |
-| **Regulatory Compliance** | Must link tests to requirements in qTest | **WORKFLOW B**: Traceability from day one |
-| **Greenfield Project** | Building test repository from scratch | **WORKFLOW A**: Build tests, populate qTest automatically |
+| **Rapid Prototyping** | Need to start testing immediately | **WORKFLOW B**: Code-first, sync documentation later |
+| **Regulatory Compliance** | Must link tests to requirements in qTest | **WORKFLOW A**: Traceability from day one |
+| **Greenfield Project** | Building test repository from scratch | **WORKFLOW B**: Build tests, populate qTest automatically |
 
 ---
 
-## WORKFLOW A: Code-First Approach
+## WORKFLOW B: Code-First Approach
 
 ### Overview
 
@@ -401,7 +401,7 @@ git commit -m "feat: Add Point Shop tests - TC-XXX through TC-YYY"
 
 ---
 
-## WORKFLOW B: qTest-First Approach
+## WORKFLOW A: qTest-First Approach
 
 ### Overview
 

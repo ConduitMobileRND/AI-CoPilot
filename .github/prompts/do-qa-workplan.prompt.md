@@ -82,21 +82,104 @@ If any item below cannot be detected, STOP and ask the user:
 
 ## Step 1. Detect Project Context (Workspace Scan)
 
-Inspect the repository to determine:
+### 1.1 Feature-Component Framework Detection
 
-- **Framework:** Playwright / Jest / TestNG / JUnit / Other
-- **Language:** TypeScript / JavaScript / Java / Python
-- **Build Tool:** npm / Maven / Gradle
+**CRITICAL:** Determine the **primary framework for the specific feature component**, not the entire project.
+
+**Detection Strategy:**
+
+1. **Identify Feature Component:**
+   - Analyze STP/STD to determine which system component the feature belongs to:
+     - Backend/API → Java-based components (P2C, Mail Service, etc.)
+     - UI (Agent/Hub/Portal) → Frontend components
+     - Data/Cloud/SQL/MongoDB → Data validation components
+   - Cross-reference with existing test location patterns
+
+2. **Map Component to Framework:**
+   - **P2C Backend/API** → Java + RestAssured + TestNG in `rest-api/src/test/java/`
+   - **UI (Agent/Hub/Portal)** → Playwright/TypeScript in `automation-web/packages/`
+   - **Data/Cloud/MongoDB/SQL** → automation-llm-validation in `automation-llm-validation/tests/`
+
+3. **Document Primary Framework:**
+   - **Primary Framework:** The framework for THIS specific feature component
+   - **Other Frameworks:** Document other frameworks available in workspace (for future reference)
+   - **Implementation Scope:** Only implement tests in the primary framework for this feature
+
+**Workspace Scan (Detect All Available):**
+
+- **All Frameworks Available:** Playwright / Jest / TestNG / JUnit / Python-pytest / Other
+- **All Languages:** TypeScript / JavaScript / Java / Python
+- **Build Tools:** npm / Maven / Gradle
 - **Structure:** Monorepo / Multi-module / Single project
-- **Test Locations:** Actual test directories
-- **Execution Commands:** Real runnable commands
+- **All Test Locations:** Detect all test directories across all components
+- **Execution Commands:** Real runnable commands per framework
 - **qTest Integration:** CLI, configs, docs, scripts
+
+**Output Format:**
+
+```markdown
+#### Feature-Component Framework Detection
+
+**This Feature:** {Feature Name} ({Component Type})
+
+| Component                                | Value                                                   | Source     |
+| ---------------------------------------- | ------------------------------------------------------- | ---------- |
+| **Feature Component**                    | {Backend/API, UI, Data Validation, etc.}                | `Detected` |
+| **Primary Framework (for this feature)** | ✅ {Java/TestNG, Playwright, automation-llm-validation} | `Detected` |
+| **Test Location**                        | {Actual test directory}                                 | `Detected` |
+| **Build Tool**                           | {Maven, npm, etc.}                                      | `Detected` |
+| **Execution Command**                    | {Actual command}                                        | `Detected` |
+
+#### Other Available Frameworks (Documented for Future)
+
+| Component/Module   | Framework   | Workspace Location | Purpose   |
+| ------------------ | ----------- | ------------------ | --------- |
+| {Other components} | {Framework} | {Path}             | {Purpose} |
+
+**Implementation Scope:**
+
+- ✅ **This workplan implements:** {Component} tests in {Primary Framework}
+- 📝 **Future iterations:** {Other components} will be separate workplans
+```
 
 Label each field explicitly:
 
 - `Detected`
 - `Assumed`
 - `Missing`
+
+---
+
+### 🚨 IMPLEMENTATION START RULE (CRITICAL)
+
+**⚠️ MANDATORY:** Implementation ALWAYS starts with the PRIMARY framework detected for the specific feature component.
+
+**Rules:**
+
+1. **Primary Framework ONLY:** All test implementation in this workplan uses ONLY the primary framework
+2. **No Mixed Frameworks:** Do NOT implement tests in multiple frameworks in one workplan
+3. **One Component, One Framework:** Each workplan is scoped to one feature component with one primary framework
+4. **Document Others:** Other frameworks are documented in a separate table for future reference only
+5. **Separate Workplans:** Other components/frameworks require separate workplan generation
+
+**Example:**
+
+- ✅ CORRECT: "P2C Localization Backend tests" → Java only (rest-api/)
+- ✅ CORRECT: "Hub UI tests" → Playwright only (automation-web/)
+- ❌ WRONG: "P2C Localization" → Java + Playwright mixed in same workplan
+
+**Epic Priority Logic:**
+
+- **P0-P1 (Implement Now):** Epics using the PRIMARY framework
+- **P2 (Document for Future):** Epics requiring OTHER frameworks (marked "Future Implementation")
+- **Timeline:** Only include PRIMARY framework epics in sprint plan
+
+**Why This Matters:**
+
+- Different frameworks = different workspaces/teams
+- Mixing frameworks creates confusion in timelines and ownership
+- Each framework has separate build tools, dependencies, and execution environments
+- Clean separation enables parallel development by different teams
 
 ---
 
@@ -331,7 +414,6 @@ Use when system is undocumented with no PRD, STP/STD, or qTest test cases.
 11. Capture and document new module ID
 12. Update Java @QTestCase annotations with PIDs from sync output
 
-
 **Rule:** All generated documentation (Design, PRD, STP, STD, JSON) must be preserved in `docs/` and `.qtest/` folders.
 
 ---
@@ -354,6 +436,11 @@ Align with detected standards; otherwise mark defaults as `Assumed`.
 
 ## Step 6. Test Epics
 
+**⚠️ CRITICAL:** Epics are prioritized by framework alignment:
+
+- **P0-P1 Priority:** Epics using the PRIMARY framework (implement in this workplan)
+- **P2 Priority (Future):** Epics requiring OTHER frameworks (document only, separate workplan needed)
+
 Each Test Epic must include:
 
 - Scope and objectives
@@ -361,8 +448,11 @@ Each Test Epic must include:
 - Test types and coverage split
 - Success criteria
 - Effort estimate (AI-assisted)
-- Priority
+- **Priority (based on framework):**
+  - P0-P1 if using PRIMARY framework → Active implementation
+  - P2 if using OTHER framework → Document for future, mark "📝 Future Implementation"
 - qTest module reference (existing or planned)
+- **Framework indicator:** Clearly state which framework (Java, Playwright, etc.)
 
 ---
 
@@ -408,10 +498,65 @@ Deliver **one markdown document** containing:
 3. Test vision and metrics
 4. Test epics and stories
 5. Sprint plan and timeline
-6. qTest integration plan
-7. Dependencies and risks
+6. **Progress Tracking** (for story/epic completion updates)
+7. qTest integration plan
+8. Dependencies and risks
 
 Clearly label all assumptions.
+
+**Progress Tracking Section Template:**
+
+````markdown
+## Progress Tracking
+
+**Last Updated:** YYYY-MM-DD
+
+### Epic Overview
+
+| Epic                    | Priority | Stories | Completed | Progress | Status     |
+| ----------------------- | -------- | ------- | --------- | -------- | ---------- |
+| Epic 1: Framework Setup | P0       | 3       | 0         | 0%       | ⏸️ Pending |
+| Epic 2: Agent Tests     | P1       | 2       | 0         | 0%       | ⏸️ Pending |
+| Epic 3: API Tests       | P1       | 1       | 0         | 0%       | ⏸️ Pending |
+
+### Story Completion Log
+
+#### Epic 1: Framework Setup
+
+- [ ] Story 1.1: Configure Test Module (⏸️ Pending)
+- [ ] Story 1.2: Document UI Structure (⏸️ Pending)
+- [ ] Story 1.3: Prepare Test Environment (⏸️ Pending)
+
+#### Epic 2: Agent Tests
+
+- [ ] Story 2.1: Agent Slovak Validation (⏸️ Pending)
+- [ ] Story 2.2: Natural Language Review (⏸️ Pending)
+
+**Status Legend:**
+
+- ✅ Completed
+- ⏳ In Progress
+- ⏸️ Pending
+- ⛔ Blocked
+
+**Update Instructions:**
+
+When a story is completed:
+
+1. Check the box: `- [x]`
+2. Update status emoji
+3. Add completion date
+4. Update Epic progress percentage
+5. Commit changes to git
+
+Example after Story 1.1 completion:
+
+```markdown
+- [x] Story 1.1: Configure Test Module (✅ Completed 2026-02-15)
+```
+````
+
+````
 
 ---
 
@@ -447,15 +592,17 @@ Respond **only** with a clarification request.
 Once the QA work plan document is generated, guide the user through:
 
 ### Phase 1: Test Implementation (Sprint 1)
+
 ```bash
 # 1. Review and approve the work plan
 # 2. Set up test environment
 # 3. Implement priority 1 tests (critical path)
-```
+````
 
 ### Phase 2: qTest Integration
 
 **For WORKFLOW A (qTest-First):**
+
 ```bash
 # Verify existing test cases match implementation
 curl -s -H "Authorization: Bearer $QTEST_API_TOKEN" \
@@ -463,6 +610,7 @@ curl -s -H "Authorization: Bearer $QTEST_API_TOKEN" \
 ```
 
 **For WORKFLOW B (Code-First):**
+
 ```bash
 # 1. Auto-extract tests to JSON
 python3 .qtest/java_parser.py <test-dir> --output test-cases/<module>
@@ -476,6 +624,7 @@ python3 .qtest/java_parser.py <test-dir> --output test-cases/<module>
 ```
 
 **For WORKFLOW C (Reverse Engineering):**
+
 ```bash
 # 1. Use AI prompts to generate missing docs
 @workspace /do-design  # Generate design doc
@@ -486,6 +635,7 @@ python3 .qtest/java_parser.py <test-dir> --output test-cases/<module>
 ```
 
 ### Phase 3: Execute Test Suite
+
 ```bash
 # Run implemented tests
 <detected-test-command>
@@ -497,6 +647,7 @@ pytest tests/<module>
 ```
 
 **After all tests pass locally:**
+
 ```bash
 # Update JSON file with implementation status
 # Add "implementationStatus": "completed" to JSON metadata
@@ -521,29 +672,100 @@ git commit -m "Mark {Module} tests as completed - all tests passing"
 **Implementation Status Tracking Rule:**
 
 ⚠️ **CRITICAL:** Update JSON file metadata when ALL tests in that file:
+
 - ✅ Are fully implemented (no `test.fixme()` or `@Disabled`)
 - ✅ Run locally without errors
 - ✅ Pass all assertions
 - ✅ Have proper cleanup (no leftover test data)
 
 **Status Values:**
+
 - `"pending"` - Tests created but not implemented
 - `"in-progress"` - Some tests implemented, some pending
 - `"completed"` - All tests implemented and passing
 - `"blocked"` - Implementation blocked by dependencies
 
+---
+
+**Workplan Progress Tracking Rule:**
+
+⚠️ **CRITICAL:** Update the workplan markdown file when stories/sub-stories are completed.
+
+**When to Update the Workplan:**
+
+After implementing and verifying a Story (e.g., Story 1.1):
+
+1. ✅ All tests for that story are implemented
+2. ✅ All tests pass locally
+3. ✅ JSON files are updated with `"implementationStatus": "completed"`
+
+**Then:**
+
+1. **Update the Story in Workplan:**
+   - Add status indicator: `**Status:** ✅ Completed (YYYY-MM-DD)`
+   - Add completion summary with test counts
+   - Example:
+
+     ```markdown
+     **Story 1.1:** Configure Localization Test Module
+     **Status:** ✅ Completed (2026-02-15)
+
+     - Package structure created ✅
+     - Base test class configured ✅
+     - Slovak locale resources verified ✅
+     - **Tests:** 3/3 passing
+     ```
+
+2. **Update Epic Progress:**
+   - Track completed stories vs total stories
+   - Example:
+
+     ```markdown
+     ### Epic 1: Test Automation Framework Setup
+
+     **Priority:** P0 (Blocker)  
+     **Progress:** 2/3 Stories Complete (67%)
+     **Status:** ⏳ In Progress
+     ```
+
+3. **Commit the Updated Workplan:**
+   ```bash
+   git add docs/{feature}/localization-workplan.md
+   git commit -m "Update workplan: Story 1.1 completed - all tests passing"
+   ```
+
+**Best Practice:**
+
+- Update workplan immediately after story completion
+- Keep progress indicators current and accurate
+- Use consistent status emoji: ✅ Complete | ⏳ In Progress | ⏸️ Pending | ⛔ Blocked
+- Document completion dates for audit trail
+
+**Epic Completion:**
+
+When ALL stories in an Epic are complete:
+
+- Update Epic status: `**Status:** ✅ Completed (YYYY-MM-DD)`
+- Add Epic completion summary
+- Move to next Epic in priority order
+
+---
+
 ### Phase 4: CI/CD Integration
+
 - Update CI pipeline with new test suites
 - Configure test reporting (Allure, qTest integration)
 - Set up Slack/Teams notifications for failures
 
 ### Phase 5: Sprint Progression
+
 - **Sprint 1 Complete:** Move to Priority 2 tests
 - **Sprint 2 Complete:** Integration and edge cases
 - **Sprint 3 Complete:** Performance and final polish
 - **Blocked:** Document blockers in work plan and escalate
 
 ### Phase 6: Documentation & Handoff
+
 - Update README with test execution commands
 - Document qTest module structure and IDs
 - Create runbook for test maintenance
@@ -584,6 +806,7 @@ This will:
 ```
 
 **When to run implementation prompt:**
+
 - After JSON files are created in `.qtest/test-cases/{package}/`
 - After test spec files are created with placeholders
 - When ready to implement actual test logic

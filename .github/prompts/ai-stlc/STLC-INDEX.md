@@ -5,6 +5,20 @@
 
 ---
 
+## ⚡ NEW TO AI-STLC? Start Here First!
+
+### 📖 **[AI-STLC-QUICK-START.md](AI-STLC-QUICK-START.md)** ← **Recommended First Read (5 min)**
+
+**Use this if you:**
+- 🆕 Are brand new to AI-STLC workflows
+- 🤔 Don't know which workflow (A, B, or C) to use
+- 🏷️ Need to understand `@QTestCase` annotation patterns
+- 🗺️ Want a quick decision tree and command reference
+
+**After reading Quick Start, return here for detailed prompts.**
+
+---
+
 ## 🚀 Quick Start (30 seconds)
 
 ### **Option 1: I have a qTest Module ID**
@@ -24,7 +38,7 @@ Example: `"Start AI-STLC workflow for payment cashback feature"`
 "Start AI-STLC workflow"
 ```
 
-**All routes go through:** [`do-stlc-start.prompt.md`](do-stlc-start.prompt.md)
+**All routes go through:** [`do-stlc-start.prompt.md`](../do-stlc-start.prompt.md)
 
 ---
 
@@ -291,10 +305,14 @@ Check that each step produces the expected output file before moving to next ste
 
 ## 📖 Detailed Documentation
 
-For comprehensive details, see:
+### Quick Router (Start Here)
+- 📖 **[AI-STLC-QUICK-START.md](AI-STLC-QUICK-START.md)** (5 min) - Decision tree & command reference
 
-- **Strategy Guide:** `docs/ai-stlc/AI-STLC-Triple-Workflow-Strategy.md` (1671 lines)
-- **Presentation:** `docs/ai-stlc/AI-STLC-Presentation.marmed.md` (656 lines)
+### Specialized Guides
+- 🛠️ **[AI-STLC-IMPLEMENTATION-GUIDE.md](AI-STLC-IMPLEMENTATION-GUIDE.md)** (15 min) - Step-by-step commands for developers
+- 🗺️ **[AI-STLC-ORGANIZATION.md](AI-STLC-ORGANIZATION.md)** (10 min) - Visual structure & navigation
+- 📘 **[AI-STLC-Triple-Workflow-Strategy.md](AI-STLC-Triple-Workflow-Strategy.md)** (60 min) - Strategic overview & ROI
+- 📝 **[AI-STLC-REFACTORING-SUMMARY.md](AI-STLC-REFACTORING-SUMMARY.md)** (5 min) - Feb 2026 improvements
 
 ---
 

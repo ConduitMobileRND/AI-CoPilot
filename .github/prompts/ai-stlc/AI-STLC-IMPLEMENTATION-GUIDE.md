@@ -17,6 +17,19 @@
 
 ---
 
+## 📚 Related Documentation
+
+| Document | Purpose | Read Time |
+|----------|---------|-----------|
+| **[AI-STLC-QUICK-START.md](AI-STLC-QUICK-START.md)** | 5-minute router & decision tree | 5 min |
+| **[AI-STLC-ORGANIZATION.md](AI-STLC-ORGANIZATION.md)** | Visual structure & navigation | 10 min |
+| **[AI-STLC-Triple-Workflow-Strategy.md](AI-STLC-Triple-Workflow-Strategy.md)** | Strategic overview & ROI | 60 min |
+| **[STLC-INDEX.md](STLC-INDEX.md)** | Master index of all prompts | Quick ref |
+
+**💡 Tip:** New to AI-STLC? Start with [AI-STLC-QUICK-START.md](AI-STLC-QUICK-START.md) first!
+
+---
+
 ## 🌳 Quick Decision Tree
 
 ```mermaid
@@ -59,6 +72,14 @@ graph TB
 - ✅ Need to automate existing test suite
 - ✅ Test cases are stable and approved
 
+**@QTestCase Pattern:**
+```java
+// JSON already has qTestPID: "TC-2415" (from qTest)
+@QTestCase("TC-2415")  // ✅ Use TC from JSON during implementation
+@Test
+void testCashbackCalculation() { }
+```
+
 **Step-by-Step:**
 
 ```bash
@@ -73,10 +94,12 @@ graph TB
 # Step 3: AI creates JSON test definitions
 # Location: .qtest/test-cases/{package}/{Module}.json
 # Contains: Only automation tests (Type=702)
+# ✅ JSON includes qTestPID: "TC-2415" (from qTest)
 
 # Step 4: Implement tests (using GitHub Copilot)
-# Input: JSON file with test cases
+# Input: JSON file with test cases (qTestPID already populated)
 # Output: Test code (e.g., Flow4CashbackProcessingTest.java)
+# ✅ Use @QTestCase("TC-2415") from JSON qTestPID during implementation
 
 # Step 5: Run and verify tests
 mvn test                                    # Java/API
@@ -85,7 +108,7 @@ npm test                                    # TypeScript/Playwright
 # Step 6: Validate synchronization
 npm run validate:pids                       # Check PID mapping
 
-# Step 7: Sync to qTest
+# Step 7: Sync to qTest (if test details updated)
 qtest sync --module {moduleId} \
   --tests-dir ./.qtest/test-cases/{package}/ \
   --create-submodules
@@ -95,7 +118,8 @@ qtest sync --module {moduleId} \
 - 🔹 Only automation tests go into JSON files
 - 🔹 Manual tests stay in qTest and STD documentation
 - 🔹 Verify all tests pass before syncing to qTest
-- 🔹 Use qTestPID fields for bi-directional sync
+- 🔹 JSON already has qTestPID from qTest - use in @QTestCase immediately
+- 🔹 No reverse-sync needed (TC numbers already exist)
 
 **Expected Timeline:**
 - Fetch & JSON creation: 30-45 min (AI-assisted)
@@ -105,6 +129,19 @@ qtest sync --module {moduleId} \
 ---
 
 ### 🔵 WORKFLOW B: Code-First (New Features)
+
+**@QTestCase Pattern:**
+```java
+// STEP 1: During implementation (no qTest tests yet)
+@QTestCase("")  // ✅ Empty - test doesn't exist in qTest yet
+@Test
+void testCashbackCalculation() { }
+
+// STEP 2-3: After sync to qTest + reverse-sync
+@QTestCase("TC-2415")  // ✅ Updated with TC from JSON after sync
+@Test
+void testCashbackCalculation() { }
+```
 
 #### 🚀 Quick Path (Simple Features)
 
@@ -129,19 +166,34 @@ qtest sync --module {moduleId} \
 
 # Output: .qtest/test-cases/{package}/PaymentFeature.json
 # Contains: Only automation tests
+# ✅ JSON has qTestPID: null (not synced to qTest yet)
 # Timeline: 15 min
 
 # Step 3: Implement tests
 # Using: GitHub Copilot + JSON test cases
 # Output: Test code files
+# ✅ Use @QTestCase("") - empty, no TC numbers yet
 # Timeline: 1-2 days
 
 # Step 4: Verify implementation
 mvn test                                    # Run all tests
 # Expected: 100% pass rate
 
-# Step 5: Sync to qTest
-.qtest/simple_sync.py --module payment-feature --tests-dir .qtest/test-cases/{package}/
+# Step 5: Sync to qTest (creates TC numbers in qTest)
+cd /path/to/qtest-mcp-server
+node sync-p2c.js
+# Output: TC-2415, TC-2416, etc. created in qTest
+# Timeline: 5-10 min
+
+# Step 6: Reverse sync to fetch TC numbers into JSON
+node reverse-sync-qtest-to-json.js
+# Updates JSON: "qTestPID": "TC-2415"
+# Timeline: 2-5 min
+
+# Step 7: Update @QTestCase annotations
+# Update all @QTestCase("") → @QTestCase("TC-2415") using TC from JSON
+# ✅ Match JSON qTestPID values exactly
+# Timeline: 10-15 min
 ```
 
 **Expected Timeline:** 2-4 days total
@@ -183,18 +235,33 @@ mvn test                                    # Run all tests
 "Extract automation tests from payment-feature-std.md to JSON"
 
 # Output: .qtest/test-cases/{package}/PaymentFeature.json
+# ✅ JSON has qTestPID: null (not synced to qTest yet)
 # Timeline: 15 min
 
 # Step 5: Implement tests
 # Using: GitHub Copilot + JSON + Workplan
+# ✅ Use @QTestCase("") - empty, no TC numbers yet
 # Timeline: 3-5 days
 
 # Step 6: Verify implementation
 mvn test                                    # Full regression
 npm run validate:pids                       # Validate PID sync
 
-# Step 7: Sync to qTest
-qtest sync --module {moduleId} --tests-dir ./.qtest/test-cases/{package}/ --create-submodules
+# Step 7: Sync to qTest (creates TC numbers in qTest)
+cd /path/to/qtest-mcp-server
+node sync-p2c.js
+# Output: TC-2415, TC-2416, etc. created in qTest
+# Timeline: 5-10 min
+
+# Step 8: Reverse sync to fetch TC numbers into JSON
+node reverse-sync-qtest-to-json.js
+# Updates JSON: "qTestPID": "TC-2415"
+# Timeline: 2-5 min
+
+# Step 9: Update @QTestCase annotations
+# Update all @QTestCase("") → @QTestCase("TC-2415") using TC from JSON
+# ✅ Match JSON qTestPID values exactly
+# Timeline: 10-20 min
 ```
 
 **Expected Timeline:** 5-8 days total
@@ -209,6 +276,19 @@ qtest sync --module {moduleId} --tests-dir ./.qtest/test-cases/{package}/ --crea
 - ✅ No STP/STD documentation
 - ✅ No qTest module
 - ✅ Need to document existing behavior first
+
+**@QTestCase Pattern (Same as Workflow B):**
+```java
+// Tests already exist in code, but not in qTest
+@QTestCase("")  // ✅ Empty - test not synced to qTest yet
+@Test
+void existingTestCase() { }
+
+// After sync to qTest + reverse-sync
+@QTestCase("TC-2415")  // ✅ Updated with TC from JSON after sync
+@Test
+void existingTestCase() { }
+```
 
 **Step-by-Step:**
 
@@ -226,8 +306,10 @@ qtest sync --module {moduleId} --tests-dir ./.qtest/test-cases/{package}/ --crea
 # Output: docs/prd/payment-system-prd.md
 # Timeline: 3-4 hours (AI-assisted)
 
-# Step 3-7: Follow Workflow A (Full Path)
-# Use the generated PRD and continue with STP → STD → Workplan → Implement → Sync
+# Step 3-8: Follow Workflow B (Full Path)
+# Use the generated PRD and continue with STP → STD → Workplan
+# Tests already exist, so add @QTestCase("") → Implement missing → Sync to qTest
+# → Reverse sync → Update @QTestCase with TC numbers from JSON
 ```
 
 **Expected Timeline:** 7-10 days total

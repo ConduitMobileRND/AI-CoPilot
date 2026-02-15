@@ -6,6 +6,19 @@
 
 ---
 
+## 📚 Related Documentation
+
+| Document | Purpose | Read Time |
+|----------|---------|-----------|
+| **[AI-STLC-QUICK-START.md](AI-STLC-QUICK-START.md)** | 5-minute router & command reference | 5 min |
+| **[AI-STLC-IMPLEMENTATION-GUIDE.md](AI-STLC-IMPLEMENTATION-GUIDE.md)** | Step-by-step commands for developers | 15 min |
+| **[AI-STLC-Triple-Workflow-Strategy.md](AI-STLC-Triple-Workflow-Strategy.md)** | Strategic overview & ROI | 60 min |
+| **[STLC-INDEX.md](STLC-INDEX.md)** | Master navigation index | Quick ref |
+
+**💡 Tip:** New to AI-STLC? Start with [AI-STLC-QUICK-START.md](AI-STLC-QUICK-START.md) first!
+
+---
+
 ## 📊 High-Level Organization
 
 ```
@@ -23,7 +36,7 @@ AI-STLC Ecosystem
    ┌─────────┐     ┌─────────┐     ┌─────────┐
    │WORKFLOW │     │WORKFLOW │     │WORKFLOW │
    │   A     │     │   B     │     │   C     │
-   │Code-    │     │qTest-   │     │Reverse  │
+   │qTest-   │     │Code-    │     │Reverse  │
    │First    │     │First    │     │Engineer │
    └─────────┘     └─────────┘     └─────────┘
 ```
@@ -47,7 +60,7 @@ AI-CoPilot/
         │   ├── AI-STLC-Triple-Workflow-Strategy.md (1671 lines)
         │   └── AI-STLC-Brief-Presentation.md
         │
-        ├── 🔵 Workflow A & C Prompts (Code-First & Reverse Engineering)
+        ├── 🔵 Workflow B & C Prompts (Code-First & Reverse Engineering)
         │   ├── do-stp.prompt.md                  ← Generate Test Plan
         │   ├── do-std.prompt.md                  ← Generate Test Design
         │   ├── do-qa-workplan.prompt.md          ← Generate Implementation Plan
@@ -71,7 +84,7 @@ AI-CoPilot/
         │   ├── do-feature-design.prompt.md       ← Feature design
         │   └── do-project-design.prompt.md       ← Project architecture
         │
-        └── 🟢 Workflow B Support (qTest-First)
+        └── 🟢 Workflow A Support (qTest-First)
             └── qtest-mcp-server/                 ← qTest integration tools
 ```
 
@@ -132,23 +145,23 @@ graph TB
     START --> DETECT
     DETECT --> RECOMMEND
     
-    RECOMMEND -->|Has PRD| A_DECISION
-    RECOMMEND -->|Has qTest Module| B1
+    RECOMMEND -->|Has qTest Module| A1
+    RECOMMEND -->|Has PRD| B_DECISION
     RECOMMEND -->|Legacy System| C1
     
-    A_DECISION -->|<15 tests| A_Q1
-    A_DECISION -->|>15 tests| A_F1
+    B_DECISION -->|<15 tests| B_Q1
+    B_DECISION -->|>15 tests| B_F1
     
-    A_Q1 --> A_Q2 --> A_Q3 --> A_Q4
-    A_F1 --> A_F2 --> A_F3 --> A_F4 --> A_F5
+    B_Q1 --> B_Q2 --> B_Q3 --> B_Q4
+    B_F1 --> B_F2 --> B_F3 --> B_F4 --> B_F5
     
-    B1 --> B2 --> B3 --> B4 --> B5
+    A1 --> A2 --> A3 --> A4 --> A5
     
     C1 --> C2 --> C3
     
-    A_Q4 --> IMPL
-    A_F5 --> IMPL
-    B4 --> IMPL
+    B_Q4 --> IMPL
+    B_F5 --> IMPL
+    A4 --> IMPL
     
     IMPL --> VERIFY
     VERIFY --> SYNC
@@ -170,7 +183,7 @@ graph TB
 |--------|----------|---------|
 | **do-stlc-start.prompt.md** | Orchestrator | Routes to correct workflow |
 
-### 2️⃣ Test Planning & Design (Workflow A & C)
+### 2️⃣ Test Planning & Design (Workflow B & C)
 
 | Prompt | Category | Path | Input | Output |
 |--------|----------|------|-------|--------|
@@ -216,12 +229,12 @@ graph TB
 
 | Scenario | Artifacts Available | Workflow | First Prompt | Path |
 |----------|---------------------|----------|--------------|------|
-| **New feature with PRD** | ✅ PRD<br/>❌ qTest<br/>❌ Tests | 🔵 A | `do-stlc-start` | Quick or Full |
-| **Existing qTest module** | ✅ qTest (50+ tests)<br/>❌ Code | 🟢 B | `do-stlc-start` or `{moduleId}` | qTest-First |
-| **Hotfix/POC** | ✅ JIRA ticket<br/>❌ Full PRD | 🔵 A | `do-stlc-start` | Quick Path |
-| **Legacy system** | ✅ Working code<br/>❌ Documentation | 🟠 C | `do-design` | Reverse → A |
-| **Enhancement** | ✅ Existing tests<br/>✅ Requirements | 🔵 A | `do-stlc-start` | Quick or Full |
-| **Complex feature** | ✅ PRD<br/>✅ >15 test cases | 🔵 A | `do-stlc-start` | Full Path |
+| **New feature with PRD** | ✅ PRD<br/>❌ qTest<br/>❌ Tests | 🔵 B | `do-stlc-start` | Quick or Full |
+| **Existing qTest module** | ✅ qTest (50+ tests)<br/>❌ Code | 🟢 A | `do-stlc-start` or `{moduleId}` | qTest-First |
+| **Hotfix/POC** | ✅ JIRA ticket<br/>❌ Full PRD | 🔵 B | `do-stlc-start` | Quick Path |
+| **Legacy system** | ✅ Working code<br/>❌ Documentation | 🟠 C | `do-design` | Reverse → B |
+| **Enhancement** | ✅ Existing tests<br/>✅ Requirements | 🔵 B | `do-stlc-start` | Quick or Full |
+| **Complex feature** | ✅ PRD<br/>✅ >15 test cases | 🔵 B | `do-stlc-start` | Full Path |
 
 ---
 
@@ -292,8 +305,8 @@ graph LR
 
 Throughout AI-STLC documentation:
 
-- 🟢 **Green** = Workflow B (qTest-First)
-- 🔵 **Blue** = Workflow A (Code-First)
+- 🟢 **Green** = Workflow A (qTest-First)
+- 🔵 **Blue** = Workflow B (Code-First)
 - 🟠 **Orange** = Workflow C (Reverse Engineering)
 - 🎯 **Target** = Master Orchestrator / Entry Point
 - 📋 **Document** = Documentation / Artifacts
@@ -313,19 +326,19 @@ Throughout AI-STLC documentation:
 │  ├── Hotfix                                                │
 │  ├── POC/Spike                                             │
 │  └── Small enhancement                                     │
-│  → Use: Workflow A Quick Path                              │
+│  → Use: Workflow B Quick Path                              │
 │                                                             │
 │  MODERATE (15-50 tests, 1-2 weeks)                         │
 │  ├── Single feature                                        │
 │  ├── API endpoint suite                                    │
 │  └── Module enhancement                                    │
-│  → Use: Workflow A Full Path or Workflow B                 │
+│  → Use: Workflow B Full Path or Workflow A                 │
 │                                                             │
 │  COMPLEX (50+ tests, 2+ weeks)                             │
 │  ├── Major feature                                         │
 │  ├── System integration                                    │
 │  └── Multi-module changes                                  │
-│  → Use: Workflow A Full Path or Workflow B                 │
+│  → Use: Workflow B Full Path or Workflow A                 │
 │                                                             │
 │  LEGACY (Unknown complexity)                                │
 │  ├── Undocumented system                                   │
@@ -369,7 +382,7 @@ Throughout AI-STLC documentation:
 │  ├── Requirements source                                 │
 │  ├── Acceptance criteria                                 │
 │  └── Story tracking                                      │
-│  → Input source for Workflow A Quick Path               │
+│  → Input source for Workflow B Quick Path               │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
 ```

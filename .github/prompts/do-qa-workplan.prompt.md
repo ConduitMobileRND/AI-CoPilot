@@ -260,11 +260,30 @@ Always state the selected workflow explicitly with justification.
    - Generate diff report
    - Plan sync strategy (create/update/skip)
 
-6. **Sync Changes to qTest (ONLY AFTER VERIFICATION)**
+6. **Sync Changes to qTest (Workflow-Specific)**
+
+   **Workflow A (qTest-First):**
 
    ```bash
-   # Use Python sync script for reliability
-   python3 .qtest/simple_sync.py test-cases/<module>/<TestFile>.json <MODULE_ID>
+   # Tests already exist in qTest with TC-XXXX numbers
+   # JSON already has qTestPID from qTest
+   # Implement tests using @QTestCase("TC-2415") from JSON
+   # No initial sync needed - TC numbers already exist
+   ```
+
+   **Workflow B/C (Code-First/Reverse Eng):**
+
+   ```bash
+   # Tests implemented with @QTestCase("") - empty
+   # Sync to qTest to create TC numbers
+   cd /path/to/qtest-mcp-server
+   node sync-p2c.js
+
+   # Run reverse sync to fetch TC numbers into JSON
+   node reverse-sync-qtest-to-json.js
+   # Updates JSON: "qTestPID": "TC-2415"
+
+   # Update @QTestCase annotations: "" → "TC-2415" from JSON
    ```
 
    **⚠️ CRITICAL RULE:** Only sync after:
@@ -273,9 +292,9 @@ Always state the selected workflow explicitly with justification.
    - All tests pass successfully
    - Backend features are deployed and working
 
-7. **Update Annotations with qTest IDs**
-   - Update Java @QTestCase annotations with TC-XXXX PIDs
-   - Re-run java_parser.py to update JSON files with PIDs
+7. **Update Annotations with qTest IDs (Workflows B/C Only)**
+   - Update Java @QTestCase("") → @QTestCase("TC-2415") using qTestPID from JSON
+   - Verify all annotations match JSON qTestPID values
    - Commit updated test files with qTest references
 
 ### Available qTest CLI Tools:
@@ -320,16 +339,28 @@ Always state the selected workflow explicitly with justification.
 
 ### Recommended Workflow:
 
+**Workflow A (qTest-First):**
+
+```
+1. Verify credentials    → .qtest/test-qtest-connection.sh
+2. Fetch existing tests  → curl qTest API (tests already have TC-XXXX)
+3. Generate JSON/Code    → MCP generateTestCode() or manual export (JSON has qTestPID)
+4. Implement tests       → Write Java test code with @QTestCase("TC-2415") from JSON
+5. Run tests locally     → Validate implementation
+6. Sync updates to qTest → python3 simple_sync.py (if test details changed)
+```
+
+**Workflow B/C (Code-First/Reverse Eng):**
+
 ```
 1. Verify credentials    → .qtest/test-qtest-connection.sh
 2. Fetch existing tests  → curl qTest API (understand structure)
 3. Plan test structure   → Create module if needed
-4. Implement tests       → Write Java test code
+4. Implement tests       → Write Java test code with @QTestCase("") - empty
 5. Run tests locally     → Validate implementation
-6. Auto-extract JSON     → python3 java_parser.py (from verified code)
-7. Sync to qTest         → python3 simple_sync.py (only after #5 passes)
-8. Update annotations    → Add TC-XXXX to @QTestCase in Java
-9. Re-extract JSON       → Update JSON with PIDs for future syncs
+6. Sync to qTest         → cd qtest-mcp-server && node sync-p2c.js
+7. Reverse sync          → node reverse-sync-qtest-to-json.js (fetch TC-XXXX into JSON)
+8. Update annotations    → Change @QTestCase("") → @QTestCase("TC-2415") from JSON
 ```
 
 ---

@@ -6,7 +6,7 @@
 "Start AI-STLC workflow for [your-feature-name]"
 ```
 
-Use prompt: **[do-stlc-start.prompt.md](do-stlc-start.prompt.md)**
+Use prompt: **[do-stlc-start.prompt.md](../do-stlc-start.prompt.md)**
 
 This master orchestrator will:
 

@@ -7,6 +7,20 @@
 
 ---
 
+## 📚 Related Documentation
+
+| Document | Purpose | Read Time |
+|----------|---------|-----------|
+| **[AI-STLC-QUICK-START.md](AI-STLC-QUICK-START.md)** | 5-minute router & command reference | 5 min |
+| **[AI-STLC-IMPLEMENTATION-GUIDE.md](AI-STLC-IMPLEMENTATION-GUIDE.md)** | Step-by-step commands for developers | 15 min |
+| **[AI-STLC-ORGANIZATION.md](AI-STLC-ORGANIZATION.md)** | Visual structure & navigation | 10 min |
+| **[AI-STLC-Triple-Workflow-Strategy.md](AI-STLC-Triple-Workflow-Strategy.md)** | Strategic overview & ROI | 60 min |
+| **[STLC-INDEX.md](STLC-INDEX.md)** | Master navigation index | Quick ref |
+
+**💡 Tip:** New to AI-STLC? Start with [AI-STLC-QUICK-START.md](AI-STLC-QUICK-START.md) first!
+
+---
+
 ## 🎯 What Was Done
 
 ### 1. Created Comprehensive Documentation Structure

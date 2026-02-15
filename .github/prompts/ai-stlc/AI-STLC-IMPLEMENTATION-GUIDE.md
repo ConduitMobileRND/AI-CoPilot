@@ -67,7 +67,7 @@ graph TB
 ### 🟢 WORKFLOW A: qTest-First (Existing Test Cases)
 
 **When to use:**
-- ✅ qTest module exists with 50+ test cases
+- ✅ qTest module exists with 10+ test cases
 - ✅ Manual test cases already documented in qTest
 - ✅ Need to automate existing test suite
 - ✅ Test cases are stable and approved

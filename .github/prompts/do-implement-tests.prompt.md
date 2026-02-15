@@ -2,7 +2,24 @@
 
 ## 🎯 Purpose
 
-Implement automated tests based on JSON specifications created from qTest modules. This prompt analyzes your project structure, learns existing patterns, and guides you through test implementation.
+Implement automated tests based on JSON specifications created from qTest modules.
+
+**This prompt will:**
+
+1. ✅ **Analyze existing project structure** - detect framework, language, patterns
+2. ✅ **Learn from existing code** - examine test files, page objects, utilities
+3. ✅ **Inspect UI and get DOM locators** - for UI/Web tests, navigate to page and find real selectors
+4. ✅ **Match existing patterns exactly** - follow naming, structure, coding conventions
+5. ✅ **Reuse existing components** - update existing page objects, don't create new ones
+6. ✅ **Update existing files** - add tests to existing spec files
+7. ✅ **Update JSON only** - mark implementation status in JSON file
+
+**This prompt will NOT:**
+
+- ❌ Create new README/SUMMARY/IMPLEMENTATION markdown files
+- ❌ Create new documentation after implementation
+- ❌ Create new test classes (adds to existing)
+- ❌ Create new page objects without explicit approval
 
 ## 📋 Prerequisites
 
@@ -95,6 +112,92 @@ grep -n "assert " tests/**/*.py | head -20
 - Page Object Models (if used)
 - Common patterns (login, navigation, cleanup)
 
+### 1.4 Inspect UI and Get DOM Locators (For UI/Web Tests)
+
+**For TypeScript/Playwright, Java/Selenium, or any UI automation:**
+
+Before implementing Page Object Models, navigate to the actual web page and inspect the DOM to get real, working locators.
+
+**Steps:**
+
+1. **Run existing authentication/setup test** (if required):
+
+   ```bash
+   # TypeScript/Playwright example
+   npm run test:hub:qa -- hub-smoke --headed
+
+   # This creates auth state and you can see the UI
+   ```
+
+2. **Navigate to the target page in headed mode**:
+
+   ```bash
+   # Open browser in headed mode to inspect UI
+   npm run test:hub:qa -- {test-name} --headed --debug
+   ```
+
+3. **Use Browser DevTools to inspect elements**:
+   - Right-click element → Inspect
+   - Look for reliable selectors in order of preference:
+     - `[data-testid="..."]` - Most reliable
+     - `[data-automation-id="..."]` - Automation-specific
+     - `[aria-label="..."]` - Accessibility labels
+     - `#id` - Unique IDs
+     - `.class` - CSS classes (less reliable)
+     - Text content - `text="button label"` (Playwright)
+     - Role selectors - `role=button[name="Submit"]` (Playwright)
+
+4. **Document available locators before creating Page Objects**:
+
+   ```typescript
+   // Example findings from DOM inspection:
+   // Members page:
+   // - Search input: [data-testid="member-search"], input[placeholder="Search members"]
+   // - Member list item: [data-testid="member-item"], .member-card
+   // - Member profile: [data-testid="member-profile"], #profile-container
+   // - Wallet section: [data-automation-id="wallet-section"], .wallet-list
+   // - Activity section: [data-testid="member-activities"], .activity-feed
+   ```
+
+5. **Test locators in browser console**:
+
+   ```javascript
+   // In browser DevTools console, test if locator works:
+   document.querySelector('[data-testid="member-search"]');
+   document.querySelectorAll('[data-testid="member-item"]').length;
+
+   // For Playwright locators:
+   // Use Playwright Inspector (npx playwright codegen) to record interactions
+   ```
+
+6. **Create Page Object with multiple selector strategies**:
+   ```typescript
+   // Use findings to create flexible Page Object with fallback selectors
+   private searchInput = [
+     '[data-testid="member-search"]',
+     '[data-automation-id="search"]',
+     'input[placeholder*="Search"]',
+     'input[name="search"]',
+     'role=searchbox'
+   ];
+   ```
+
+**Benefits:**
+
+- ✅ Accurate locators from the start (reduces failures)
+- ✅ Multiple fallback strategies for resilience
+- ✅ Understand actual UI structure before coding
+- ✅ Identify missing test IDs and report to dev team
+- ✅ See real element states (visible, hidden, disabled)
+
+**Tools:**
+
+- **Playwright Inspector**: `npx playwright codegen {url}` - Records interactions and generates code
+- **Browser DevTools**: Chrome/Firefox DevTools for manual inspection
+- **Playwright Test UI Mode**: `npm test -- --ui` - Interactive test runner with DOM viewer
+
+**Note:** For API-only tests (Java/REST), skip this step as there's no UI to inspect.
+
 ---
 
 ## Step 2: Implementation Strategy
@@ -126,6 +229,7 @@ test.describe("Module Name", () => {
 
 **Implementation Checklist:**
 
+- [ ] Inspect UI in browser and get real DOM locators (Step 1.4)
 - [ ] Import correct base test class
 - [ ] Use proper Page Object Models (if available)
 - [ ] Add Logger statements for traceability
@@ -274,24 +378,40 @@ test("TC-XX: Verify favorite functionality", async ({ page }) => {
 
 ### 3.3 Identify Required Page Objects
 
+**Important:** Before creating Page Objects, ensure you've completed Step 1.4 (Inspect UI and Get DOM Locators) to have real, working selectors.
+
 If Page Object Models don't exist:
 
 ```
 📦 Required Page Objects:
 
 1. EmailTemplatesPage
+   Methods needed:
    - navigate()
    - getTemplateCard(index)
    - clickFavorite(templateCard)
    - filterByFavorites()
 
+   Locators found (from Step 1.4 DOM inspection):
+   - Template card: [data-testid="template-card"], .template-item
+   - Favorite button: [data-testid="favorite-btn"], .favorite-icon
+   - Filter: [data-testid="favorites-filter"], button[aria-label="Favorites"]
+
 2. EmailEditorPage
+   Methods needed:
    - createTemplate(name, content)
    - saveTemplate()
    - verifyWarning()
 
-Would you like me to create these Page Objects first?
+   Locators found:
+   - Template name input: [data-testid="template-name"], input[name="templateName"]
+   - Content editor: [data-testid="editor"], .editor-content
+   - Save button: [data-testid="save-btn"], button[type="submit"]
+
+Would you like me to create these Page Objects with the inspected locators?
 ```
+
+**Best Practice:** Use multiple selector strategies per element for resilience (see Step 1.4).
 
 ### 3.4 Handle Test Data Requirements
 
@@ -403,11 +523,26 @@ Ensures:
 ```
 1. ✅ All tests implemented and passing locally
 2. ✅ PIDs validated (JSON ↔ Code sync)
-3. ⏭️ Run regression suite (ensure no breaks)
-4. ⏭️ Commit code with proper message
-5. ⏭️ [Optional] Sync results to qTest
-6. ⏭️ Create PR for review
+3. ✅ JSON file updated with implementation status (see below)
+4. ⏭️ Run regression suite (ensure no breaks)
+5. ⏭️ Commit code with proper message
+6. ⏭️ [Optional] Sync results to qTest
+7. ⏭️ Create PR for review
 ```
+
+**❌ DO NOT CREATE:**
+
+- ❌ README-{MODULE}.md files
+- ❌ IMPLEMENTATION-SUMMARY-{MODULE}.md files
+- ❌ QUICK-REF-{MODULE}.md files
+- ❌ UPDATE-{MODULE}.md files
+- ❌ Any other documentation markdown files
+
+**✅ ONLY UPDATE:**
+
+- ✅ The JSON file (`.qtest/test-cases/{package}/{module}.json`) with implementation status
+- ✅ Existing test code files (add tests to existing spec files)
+- ✅ Existing page object files (update existing pages, don't create new ones)
 
 **Git Commit Message Format:**
 
@@ -584,12 +719,16 @@ I will reference during implementation:
 ## ⚠️ Important Notes
 
 1. **Don't Create New Files** without explicit approval (per IMPORTANT_RULES.md)
+   - ❌ NO new README/SUMMARY/IMPLEMENTATION markdown files after implementation
+   - ❌ NO new documentation files for test implementation
+   - ✅ ONLY update the JSON file with implementation status (see Step 6)
 2. **Update Existing Test Files** - add new tests to existing spec files
-3. **Follow Project Conventions** - match existing code style exactly
-4. **Test Locally First** - never commit failing tests
-5. **Document Assumptions** - if unclear, ask before implementing
-6. **Keep Tests Simple** - one test = one scenario
-7. **Reuse Code** - use existing Page Objects and utilities
+3. **Analyze Existing Patterns First** - examine existing test files, page objects, and patterns before implementing
+4. **Follow Project Conventions** - match existing code style exactly
+5. **Test Locally First** - never commit failing tests
+6. **Document Assumptions** - if unclear, ask before implementing
+7. **Keep Tests Simple** - one test = one scenario
+8. **Reuse Code** - use existing Page Objects and utilities
 
 ---
 
@@ -597,14 +736,17 @@ I will reference during implementation:
 
 Implementation is complete when:
 
+- [ ] UI inspected and real DOM locators identified (for UI/Web tests - Step 1.4)
 - [ ] All tests from JSON implemented
 - [ ] All tests passing locally
 - [ ] PIDs validated (JSON ↔ Code)
-- [ ] No new test files created (added to existing files)
-- [ ] Code follows project conventions
+- [ ] Tests added to existing spec files (no new test files created)
+- [ ] Page Objects updated with real locators (existing files modified, not new ones created)
+- [ ] Code follows project conventions exactly
 - [ ] Proper logging in place
 - [ ] Test data cleanup implemented
-- [ ] **JSON file updated with implementation status**
+- [ ] **JSON file updated with implementation status** (ONLY file to be updated)
+- [ ] **NO README/SUMMARY/IMPLEMENTATION markdown files created**
 - [ ] Ready for PR/review
 
 ---

@@ -21,6 +21,23 @@
 
 ---
 
+## 📚 Quick Navigation
+
+**Looking for something specific?** Choose your guide:
+
+| Document | Purpose | Audience | Read Time |
+|----------|---------|----------|-----------|
+| **[AI-STLC-QUICK-START.md](AI-STLC-QUICK-START.md)** | 5-minute router & decision tree | Everyone (start here!) | 5 min |
+| **[AI-STLC-IMPLEMENTATION-GUIDE.md](AI-STLC-IMPLEMENTATION-GUIDE.md)** | Step-by-step commands | Developers/QA | 15 min |
+| **[AI-STLC-ORGANIZATION.md](AI-STLC-ORGANIZATION.md)** | Visual structure & navigation | Visual learners | 10 min |
+| **AI-STLC-Triple-Workflow-Strategy.md** (this file) | Strategic overview & ROI | Leadership/Stakeholders | 60 min |
+| **[AI-STLC-REFACTORING-SUMMARY.md](AI-STLC-REFACTORING-SUMMARY.md)** | What changed (Feb 2026) | Historical context | 5 min |
+| **[STLC-INDEX.md](STLC-INDEX.md)** | Master navigation index | Quick reference | As needed |
+
+**💡 First time here?** Go to [AI-STLC-QUICK-START.md](AI-STLC-QUICK-START.md) for a 5-minute overview!
+
+---
+
 ## MCP Server: The Game Changer
 
 ### Revolutionary qTest Integration
@@ -235,6 +252,90 @@ graph TD
 
 ---
 
+## 🏷️ @QTestCase Annotation Patterns by Workflow
+
+### Critical Difference: When TC Numbers Exist
+
+Each workflow has a **different @QTestCase annotation pattern** based on whether TC numbers already exist in qTest:
+
+| Workflow | TC Numbers Exist? | Initial @QTestCase | After Sync | Sync Flow |
+|----------|------------------|-------------------|------------|-----------|
+| **A: qTest-First** | ✅ YES | `@QTestCase("TC-2415")` | Same (no change) | qTest → JSON (has qTestPID) → Implement |
+| **B: Code-First** | ❌ NO | `@QTestCase("")` | `@QTestCase("TC-2415")` | Implement → Sync → Reverse-Sync → Update |
+| **C: Reverse Eng** | ❌ NO | `@QTestCase("")` | `@QTestCase("TC-2415")` | Same as Workflow B |
+
+### Workflow A: qTest-First Pattern
+
+```java
+// JSON already has qTestPID: "TC-2415" (from qTest)
+@QTestCase("TC-2415")  // ✅ Use TC from JSON during implementation
+@Test
+@DisplayName("TC-2415: Agent Greeting in Slovak")
+void testAgentGreeting_Slovak() {
+    // Implement test logic
+}
+```
+
+**Key Point:** TC numbers already exist in qTest, so JSON files have `qTestPID` populated from the start.
+
+### Workflow B & C: Code-First Pattern
+
+```java
+// STEP 1: During implementation (no qTest tests yet)
+@QTestCase("")  // ✅ Empty - test doesn't exist in qTest yet
+@Test
+@DisplayName("Agent Greeting in Slovak")
+void testAgentGreeting_Slovak() {
+    // Implement test logic
+}
+
+// STEP 2: Sync to qTest (creates TC-2415 in qTest)
+// cd /path/to/qtest-mcp-server && node sync-p2c.js
+
+// STEP 3: Reverse sync (fetches TC numbers into JSON)
+// node reverse-sync-qtest-to-json.js
+// Updates JSON: "qTestPID": "TC-2415"
+
+// STEP 4: Update @QTestCase annotation
+@QTestCase("TC-2415")  // ✅ Updated with TC from JSON
+@Test
+@DisplayName("TC-2415: Agent Greeting in Slovak")
+void testAgentGreeting_Slovak() {
+    // Test already implemented
+}
+```
+
+**Key Point:** Start with empty annotation, update after qTest sync populates JSON qTestPID field.
+
+### Sync Commands by Workflow
+
+**Workflow A (qTest-First):**
+```bash
+# 1. Tests already exist in qTest with TC-XXXX
+# 2. JSON generated with qTestPID already populated
+# 3. Implement using @QTestCase("TC-2415") from JSON
+# 4. Only sync if updating test details (optional)
+```
+
+**Workflow B/C (Code-First/Reverse Eng):**
+```bash
+# 1. Implement with @QTestCase("") - empty
+# 2. Verify all tests pass locally
+# 3. Sync to qTest (creates TC-XXXX in qTest)
+cd /path/to/qtest-mcp-server
+node sync-p2c.js
+
+# 4. Reverse sync to fetch TC numbers into JSON
+node reverse-sync-qtest-to-json.js  # Updates JSON: "qTestPID": "TC-2415"
+
+# 5. Update @QTestCase annotations to match JSON qTestPID
+# Change all @QTestCase("") → @QTestCase("TC-2415")
+```
+
+**Critical Rule:** Never update @QTestCase before running reverse-sync in Workflows B/C! JSON must have qTestPID from qTest first.
+
+---
+
 ## WORKFLOW B: Code-First Approach
 
 ### Overview
@@ -323,6 +424,7 @@ sequenceDiagram
 # - Create test files
 # - Add page objects
 # - Add assertions
+# ✅ Use @QTestCase("") - empty annotation (no TC numbers yet)
 # Example: packages/agent/tests/point-shop.spec.ts
 
 # Phase 5: Run tests locally and verify
@@ -337,7 +439,7 @@ qtest check --module {moduleId} --verbose
 cd ../qtest-mcp-server
 npm run validate:pids
 
-# Phase 7: Forward sync to qTest (ONLY AFTER verification)
+# Phase 7: Forward sync to qTest (creates TC-XXXX in qTest)
 qtest sync --module {moduleId} \
   --tests-dir ./.qtest/test-cases/{package}/ \
   --create-submodules
@@ -349,7 +451,15 @@ qtest sync --module {moduleId} \
 # ✅ Pass: N, Fail: 0
 # ✅ JSON files auto-updated with PIDs: TC-XXX through TC-YYY
 
-# Phase 8: Verify PID sync and commit
+# Phase 8: Reverse sync to fetch TC numbers into JSON
+node reverse-sync-qtest-to-json.js
+# Updates JSON: "qTestPID": "TC-2415", "qTestPID": "TC-2416", etc.
+
+# Phase 9: Update @QTestCase annotations with TC from JSON
+# Update all @QTestCase("") → @QTestCase("TC-2415")
+# ✅ Match JSON qTestPID values exactly
+
+# Phase 10: Verify PID sync and commit
 npm run validate:pids  # Check JSON ↔ Java synchronization
 git add .qtest/test-cases/
 git commit -m "feat: Add Point Shop tests - TC-XXX through TC-YYY"
@@ -464,51 +574,79 @@ sequenceDiagram
 | **Test Execution**      | Automated runs + reporting  | - Test results<br/>- Screenshots<br/>- Logs               | - CI/CD<br/>- Allure<br/>- qTest sync                         |
 | **Test Reporting**      | Dashboards, metrics         | - Test cycles<br/>- Execution trends<br/>- Defect linkage | qTest Manager                                                 |
 
-### Commands (Example: Playwright/npm)
+### Commands (Example: Web/Playwright)
 
 ```bash
-# Phase 1: Generate QA Work Plan (1 consolidated plan)
-# Use: do-qa-workplan.prompt.md with STD as input
-# Output: docs/doc_agent/promo-codes-qa-workplan.md
-#   - Implementation epics and stories
-#   - All test cases organized by priority
-#   - Timeline and dependencies
+# Phase 1: Generate JSON Files from qTest
+# ⚠️ KEY STEP: Create local JSON files with qTestPID from existing qTest tests
+cd /path/to/qtest-mcp-server
 
-# Phase 2: Generate Test Code Skeleton (1 file)
-qtest generate-code --spec ./.qtest/test-cases/{package}/{Module}.json \
-  --framework playwright \
-  --output packages/{package}/tests/
+QTEST_PROJECT_ID=124660 \
+QTEST_MODULE_ID=67588436 \
+QTEST_TESTS_DIR=/path/to/automation-web/.qtest/test-cases \
+node create-json-from-qtest.js
 
 # Output:
-# ✅ Created: packages/{package}/tests/{module}-test-cases.spec.ts
-#   (Contains all N test skeletons in one file)
+# ✅ Found 20 test cases in qTest
+# ✅ Created: 20 JSON files
+#    - advanced-purchase-with-points.json (PID: TC-10)
+#    - points-payment-flow.json (PID: TC-13)
+#    - ... (18 more files)
+# ✅ JSON files already have qTestPID assigned from qTest!
 
-# Phase 3: Implement test logic (manual with AI assistance)
-# - Add page objects
-# - Add test data
-# - Add assertions
+# Phase 2: Review Generated JSON Files
+ls -la /path/to/automation-web/.qtest/test-cases/
+cat /path/to/automation-web/.qtest/test-cases/points-payment-flow.json
 
-# Phase 4: Run tests locally and verify
-npm run test:agent:qa -- promo-codes-test-cases.spec.ts
+# Output shows:
+# {
+#   "name": "Points Payment flow",
+#   "qTestPID": "TC-13",  ← Already assigned from qTest!
+#   "status": "not-implemented",
+#   "type": "manual",
+#   "priority": "Medium",
+#   "steps": [],  ← To be filled during implementation
+#   "expectedResults": []
+# }
+
+# Phase 3: Generate QA Work Plan (1 consolidated plan)
+# Use: do-qa-workplan.prompt.md with JSON files as input
+# Output: docs/doc_agent/agent-tests-qa-workplan.md
+#   - Implementation epics and stories
+#   - All test cases organized by priority (TC-10, TC-13, etc.)
+#   - Timeline and dependencies
+
+# Phase 4: Implement Playwright Tests
+# Using JSON specs as source of truth
+# Create: packages/agent/tests/agent-test-cases.spec.ts
+
+# Example implementation:
+# @QTestCase("TC-13")  ← Use TC from JSON qTestPID
+# test('TC-13: Points Payment flow', async ({ page }) => {
+#   // Implement test logic following JSON spec
+# });
+
+# Phase 5: Run tests locally and verify
+npm run test:agent:qa -- agent-test-cases.spec.ts
 # ⚠️ CRITICAL: Ensure all tests pass AND backend is ready before syncing
 
-# Phase 5: Validate and sync to qTest (ONLY AFTER verification)
+# Phase 6: Sync Results Back to qTest
 cd ../qtest-mcp-server
-npm run validate:pids  # Validate JSON ↔ Java sync
 
-qtest sync --module {moduleId} \
-  --tests-dir ./.qtest/test-cases/{package}/ \
+qtest sync --module 67588436 \
+  --tests-dir /path/to/automation-web/.qtest/test-cases/ \
   --create-submodules
 
 # Output:
-# ✅ Synced N test results to qTest
-# ✅ Module ID: {moduleId}
-# ✅ Pass: 48, Fail: 2
-# ✅ JSON files auto-updated with PIDs for new tests
+# ✅ Synced 20 test results to qTest
+# ✅ Module ID: 67588436
+# ✅ Pass: 18, Fail: 2
+# ✅ JSON files already have PIDs (no reverse-sync needed!)
 
+# Phase 7: Create Test Cycle in qTest
 # Output:
 # ✅ Test cycle created: TC-12345
-# ✅ 50 tests linked to cycle
+# ✅ 20 tests linked to cycle
 ```
 
 # Phase 2: Generate STP using AI
@@ -688,7 +826,7 @@ sequenceDiagram
     Note over Docs: Test cases<br/>Test steps<br/>Expected results
 
     QA->>Code: 6. Implement Tests
-    Note over Code: Create test file<br/>Add infrastructure<br/>Follow STD specs
+    Note over Code: Create test file<br/>Add infrastructure<br/>Follow STD specs<br/>Use @QTestCase("") - empty
 
     Code->>Code: 7. Run Tests Locally
     Note over Code: Verify all pass<br/>100% pass rate
@@ -698,7 +836,13 @@ sequenceDiagram
     qTest-->>CLI: Return new Module ID
     CLI-->>QA: Module ID: {moduleId}
 
-    QA->>Docs: 9. Document Module ID
+    QA->>CLI: 9. Reverse Sync to Fetch TC Numbers
+    Note over CLI: node reverse-sync-qtest-to-json.js<br/>Updates JSON qTestPID
+
+    QA->>Code: 10. Update @QTestCase Annotations
+    Note over Code: Change @QTestCase("")<br/>to @QTestCase("TC-2415")
+
+    QA->>Docs: 11. Document Module ID
     Note over Docs: Update README.md<br/>Reference for future
 ````
 
